@@ -73,3 +73,13 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Build Artifacts
+testBuild_1_BackUpThisFolder_ButDontShipItWithYourGame/
+
+# Recovery
+Assets/_Recovery/
+Assets/_Recovery.meta
+
+# Burst Debug Information
+NorthPolePassionProject_BurstDebugInformation_DoNotShip/
