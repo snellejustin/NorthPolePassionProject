@@ -83,3 +83,6 @@ Assets/_Recovery.meta
 
 # Burst Debug Information
 NorthPolePassionProject_BurstDebugInformation_DoNotShip/
+
+# Crash Dumps
+mono_crash.*

@@ -2,11 +2,15 @@ using UnityEngine;
 
 public class lanceBeam : MonoBehaviour
 {
+    public LayerMask layerMask;
     public OVRInput.RawButton shootingButton;
     public LineRenderer linePrefab;
     public Transform shootingPoint;
     public float maxLineDistance = 5;
-    public float lineShowTimer = 0.3f;
+    public AudioSource audioSource;
+    public AudioClip shootingAudioClip;
+
+    private LineRenderer currentLine;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -19,20 +23,60 @@ public class lanceBeam : MonoBehaviour
     {
         if (OVRInput.GetDown(shootingButton))
         {
-            ShootHeatBeam();
+            StartShooting();
+        }
+        else if (OVRInput.GetUp(shootingButton))
+        {
+            StopShooting();
+        }
+
+        if (currentLine != null)
+        {
+            UpdateBeam();
         }
     }
 
-    public void ShootHeatBeam()
+    private void StartShooting()
     {
-        LineRenderer line = Instantiate(linePrefab);
-        line.positionCount = 2;
-        line.SetPosition(0, shootingPoint.position);
+        audioSource.Stop(); // Ensure it resets if pressed quickly
+        audioSource.PlayOneShot(shootingAudioClip);
         
-        Vector3 endPoint = shootingPoint.position + shootingPoint.forward * maxLineDistance;
-        
-        line.SetPosition(1, endPoint);
+        if (currentLine == null)
+        {
+            currentLine = Instantiate(linePrefab);
+            currentLine.positionCount = 2;
+        }
+    }
 
-        Destroy(line.gameObject, lineShowTimer);
+    private void StopShooting()
+    {
+        audioSource.Stop();
+        
+        if (currentLine != null)
+        {
+            Destroy(currentLine.gameObject);
+            currentLine = null;
+        }
+    }
+
+    private void UpdateBeam()
+    {
+        currentLine.SetPosition(0, shootingPoint.position);
+
+        Ray ray = new Ray(shootingPoint.position, shootingPoint.forward);
+        bool hasHit = Physics.Raycast(ray, out RaycastHit hit, maxLineDistance, layerMask);
+
+        Vector3 endPoint;
+
+        if (hasHit)
+        {
+            endPoint = hit.point;
+        }
+        else
+        {
+            endPoint = shootingPoint.position + shootingPoint.forward * maxLineDistance;
+        }
+        
+        currentLine.SetPosition(1, endPoint);
     }
 }
