@@ -5,12 +5,15 @@ public class lanceBeam : MonoBehaviour
     public LayerMask layerMask;
     public OVRInput.RawButton shootingButton;
     public LineRenderer linePrefab;
+    public GameObject heatImpactPrefab;
     public Transform shootingPoint;
-    public float maxLineDistance = 5;
+    public float maxLineDistance = 10;
     public AudioSource audioSource;
     public AudioClip shootingAudioClip;
 
     private LineRenderer currentLine;
+    private Vector3 lastHitPosition;
+    public float spawnDistance = 0.05f; // Adjust this for denser/sparser trail
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -46,6 +49,9 @@ public class lanceBeam : MonoBehaviour
             currentLine = Instantiate(linePrefab);
             currentLine.positionCount = 2;
         }
+        
+        // Reset last hit position so the first hit always spawns
+        lastHitPosition = Vector3.zero; 
     }
 
     private void StopShooting()
@@ -71,10 +77,21 @@ public class lanceBeam : MonoBehaviour
         if (hasHit)
         {
             endPoint = hit.point;
+            
+            // Check if we moved enough to spawn a new "weld" point
+            if (Vector3.Distance(hit.point, lastHitPosition) > spawnDistance)
+            {
+                Quaternion rotation = Quaternion.LookRotation(-hit.normal);
+                GameObject heatImpact = Instantiate(heatImpactPrefab, hit.point, rotation);
+                Destroy(heatImpact, 1f);
+                
+                lastHitPosition = hit.point;
+            }
         }
         else
         {
             endPoint = shootingPoint.position + shootingPoint.forward * maxLineDistance;
+            lastHitPosition = Vector3.zero; // Reset if we miss, so next hit spawns immediately
         }
         
         currentLine.SetPosition(1, endPoint);
