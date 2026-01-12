@@ -1,4 +1,5 @@
 using UnityEngine;
+using Meta.XR.MRUtilityKit;
 
 public class enemySpawner : MonoBehaviour
 {
@@ -6,6 +7,13 @@ public class enemySpawner : MonoBehaviour
     public GameObject prefabToSpawn;
     public float spawnRadius = 3;
     private float timer;
+
+    public float minEdgeDistance = 0.3f;
+    public MRUKAnchor.SceneLabels spawnLabels;
+    public float normalOffset;
+
+    public int spawnTry = 1000;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -15,6 +23,11 @@ public class enemySpawner : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (MRUK.Instance == null || !MRUK.Instance.IsInitialized)
+        {
+            return;
+        }
+
         timer += Time.deltaTime;
         if (timer > spawnTimer)
         {
@@ -25,8 +38,22 @@ public class enemySpawner : MonoBehaviour
 
     public void SpawnEnemy()
     {
-        Vector3 randomSpawnPosition = Random.insideUnitSphere * spawnRadius;
-        randomSpawnPosition.y = 0;
-        Instantiate(prefabToSpawn, randomSpawnPosition, Quaternion.identity);
+        MRUKRoom room = MRUK.Instance.GetCurrentRoom();
+        if (room == null) return;
+
+        int currentTry = 0;
+        while (currentTry < spawnTry)
+        {
+            bool hasFoundPosition = room.GenerateRandomPositionOnSurface(MRUK.SurfaceType.VERTICAL, minEdgeDistance, new LabelFilter(spawnLabels), out Vector3 pos, out Vector3 norm);
+            if(hasFoundPosition)
+            {
+                Vector3 randomSpawnPositionNormalOffset = pos + norm * normalOffset;
+            randomSpawnPositionNormalOffset.y = 0;
+            Instantiate(prefabToSpawn, randomSpawnPositionNormalOffset, Quaternion.identity);
+
+            return;
+        }
+        currentTry++;
     }
+}
 }
