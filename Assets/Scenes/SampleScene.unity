@@ -1120,6 +1120,15 @@ MonoBehaviour:
     Scaling: 0
     Alignment: 0
     IgnorePrefabSize: 0
+  - Labels: 1
+    Prefabs:
+    - {fileID: 2015946903575212512, guid: 2ef409da97ee54d659570e22f1f90ae0, type: 3}
+    PrefabSelection: 0
+    MatchAspectRatio: 0
+    CalculateFacingDirection: 0
+    Scaling: 0
+    Alignment: 0
+    IgnorePrefabSize: 0
 --- !u!114 &902008508
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1150,7 +1159,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.033333335
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 0}
+  m_NavMeshData: {fileID: 23800000, guid: 792f6a1d41a5545ecb9fcc5ed71355ee, type: 2}
   m_BuildHeightMesh: 0
 --- !u!4 &902008509
 Transform:
@@ -1934,7 +1943,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1986901938
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -65,7 +65,7 @@ public class lanceBeam : MonoBehaviour
         }
     }
 
-    private void UpdateBeam()
+    public void UpdateBeam()
     {
         currentLine.SetPosition(0, shootingPoint.position);
 
@@ -77,9 +77,14 @@ public class lanceBeam : MonoBehaviour
         if (hasHit)
         {
             endPoint = hit.point;
-            
+
+            enemy enemyScript = hit.transform.GetComponentInParent<enemy>();
+            if (enemyScript)
+            {
+                enemyScript.Kill();
+            }
             // Check if we moved enough to spawn a new "weld" point
-            if (Vector3.Distance(hit.point, lastHitPosition) > spawnDistance)
+            else if (Vector3.Distance(hit.point, lastHitPosition) > spawnDistance)
             {
                 Quaternion rotation = Quaternion.LookRotation(-hit.normal);
                 GameObject heatImpact = Instantiate(heatImpactPrefab, hit.point, rotation);

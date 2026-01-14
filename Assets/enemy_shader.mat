@@ -54,7 +54,7 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     - _XRMotionVectorsPass: 1
-    - _power: 2.95
+    - _power: 0.85
     m_Colors:
     - _color: {r: 0, g: 0.89161634, b: 1, a: 0.8509804}
     - _color2: {r: 0, g: 0.5094484, b: 0.945098, a: 0.59607846}
