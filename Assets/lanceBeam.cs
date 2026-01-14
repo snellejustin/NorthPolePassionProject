@@ -81,6 +81,7 @@ public class lanceBeam : MonoBehaviour
             enemy enemyScript = hit.transform.GetComponentInParent<enemy>();
             if (enemyScript)
             {
+                hit.collider.enabled = false;
                 enemyScript.Kill();
             }
             // Check if we moved enough to spawn a new "weld" point

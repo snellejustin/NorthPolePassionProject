@@ -29,4 +29,9 @@ public class enemy : MonoBehaviour
         agent.enabled = false;
         animator.SetTrigger("death");
     } 
+
+    public void Destroy()
+    {
+        Destroy(gameObject);
+    }
 }
