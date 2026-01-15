@@ -157,7 +157,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 54d55844f084d4fab985c3ac124e6729, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: c711a6547c4b74edbb0ad12332f33e19, type: 2}
+      objectReference: {fileID: 2100000, guid: 69cced9ab14ea4a86a2cb75c6ac43be7, type: 2}
     - target: {fileID: 919132149155446097, guid: 54d55844f084d4fab985c3ac124e6729, type: 3}
       propertyPath: m_Name
       value: enemy_blob (1)
