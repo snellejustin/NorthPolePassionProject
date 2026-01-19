@@ -13,6 +13,7 @@ public class enemySpawner : MonoBehaviour
     public float normalOffset;
 
     public int spawnTry = 1000;
+    public bool isSpawning = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -23,6 +24,8 @@ public class enemySpawner : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!isSpawning) return;
+
         if (MRUK.Instance == null || !MRUK.Instance.IsInitialized)
         {
             return;
