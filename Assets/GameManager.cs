@@ -9,7 +9,7 @@ public class GameManager : MonoBehaviour
     public int maxEnemies = 15;
 
     public GameObject lanceObject;
-    public GameObject mrPointerObject;
+    public GameObject xrRayInteractorObject;
 
     void Start()
     {
@@ -38,7 +38,7 @@ public class GameManager : MonoBehaviour
         spawner.isSpawning = true;
         
         if(lanceObject) lanceObject.SetActive(true);
-        if(mrPointerObject) mrPointerObject.SetActive(false);
+        if(xrRayInteractorObject) xrRayInteractorObject.SetActive(false);
     }
 
     public void GameOver()
@@ -47,7 +47,7 @@ public class GameManager : MonoBehaviour
         gameOverCanvas.SetActive(true);
 
         if(lanceObject) lanceObject.SetActive(false);
-        if(mrPointerObject) mrPointerObject.SetActive(true);
+        if(xrRayInteractorObject) xrRayInteractorObject.SetActive(true);
     }
 
     public void RestartGame()
@@ -67,6 +67,6 @@ public class GameManager : MonoBehaviour
         spawner.isSpawning = false;
 
         if(lanceObject) lanceObject.SetActive(false);
-        if(mrPointerObject) mrPointerObject.SetActive(true);
+        if(xrRayInteractorObject) xrRayInteractorObject.SetActive(true);
     }
 }
