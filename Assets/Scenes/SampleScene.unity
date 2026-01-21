@@ -270,7 +270,7 @@ MonoBehaviour:
   linePrefab: {fileID: 5063814610680345640, guid: 72c51e397dd7b46bf8fb7fcbe3593add, type: 3}
   heatImpactPrefab: {fileID: 2011347867175993249, guid: 39829acc2b15549eb818fb4294ea76e5, type: 3}
   shootingPoint: {fileID: 98169946}
-  maxLineDistance: 10
+  maxLineDistance: 50
   audioSource: {fileID: 43415987}
   shootingAudioClip: {fileID: 8300000, guid: c9730a3aa45814a6fa10f99b628dc16c, type: 3}
   spawnDistance: 0.05

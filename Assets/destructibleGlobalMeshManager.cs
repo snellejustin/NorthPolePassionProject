@@ -8,6 +8,8 @@ public class destructibleGlobalMeshManager : MonoBehaviour
     public float destructionInterval = 2.0f; // Time in seconds between destruction
     
     private List<GameObject> segments = new List<GameObject>();
+    // Map Hitbox (Key) -> Original Segment (Value)
+    private Dictionary<GameObject, GameObject> hitboxToSegmentMap = new Dictionary<GameObject, GameObject>();
     private DestructibleMeshComponent currentComponent;
     private float timer;
     private bool isDestructionActive = false;
@@ -52,6 +54,7 @@ public class destructibleGlobalMeshManager : MonoBehaviour
     {
         currentComponent = component;
         segments.Clear();
+        hitboxToSegmentMap.Clear();
 
         foreach (Transform child in component.transform)
         {
@@ -72,8 +75,51 @@ public class destructibleGlobalMeshManager : MonoBehaviour
     {
         if(segments.Remove(segment) && currentComponent.ReservedSegment != segment)
         {
-            currentComponent.DestroySegment(segment);
+            // 1. Disable the actual wall segment (effectively deleting it from view/physics)
+            segment.SetActive(false);
+
+            // 2. Create a temporary hitbox in its place
+            GameObject hitbox = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            hitbox.name = "RepairHitbox";
+            
+            // Position it at the center of the segment's bounds
+            Renderer segRenderer = segment.GetComponent<Renderer>();
+            if (segRenderer)
+            {
+                hitbox.transform.position = segRenderer.bounds.center;
+                hitbox.transform.rotation = segment.transform.rotation;
+                hitbox.transform.localScale = Vector3.one * 0.5f; // Small target
+            }
+            else
+            {
+                hitbox.transform.position = segment.transform.position;
+            }
+
+            // Make hitbox visible so the user can see where to aim
+            hitbox.GetComponent<Renderer>().enabled = true; 
+            
+            // 3. Register it
+            hitboxToSegmentMap.Add(hitbox, segment);
         }
+    }
+
+    public void RepairMeshSegment(GameObject hitbox)
+    {
+        if (hitboxToSegmentMap.TryGetValue(hitbox, out GameObject segment))
+        {
+            // 1. Re-enable the original segment
+            segment.SetActive(true);
+            segments.Add(segment);
+
+            // 2. Remove the hitbox
+            hitboxToSegmentMap.Remove(hitbox);
+            Destroy(hitbox);
+        }
+    }
+
+    public bool IsHitbox(GameObject obj)
+    {
+        return hitboxToSegmentMap.ContainsKey(obj);
     }
 
     private void DestroyRandomSegment()

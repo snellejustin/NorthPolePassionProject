@@ -70,6 +70,7 @@ public class lanceBeam : MonoBehaviour
         currentLine.SetPosition(0, shootingPoint.position);
 
         Ray ray = new Ray(shootingPoint.position, shootingPoint.forward);
+        // Standard Raycast is fine now because Hitboxes are solid colliders
         bool hasHit = Physics.Raycast(ray, out RaycastHit hit, maxLineDistance, layerMask);
 
         Vector3 endPoint;
@@ -83,6 +84,13 @@ public class lanceBeam : MonoBehaviour
             {
                 hit.collider.enabled = false;
                 enemyScript.Kill();
+            }
+            // Check for Wall Repair Hitbox
+            // Check for Wall Repair Hitbox
+            else if (FindFirstObjectByType<destructibleGlobalMeshManager>()?.IsHitbox(hit.collider.gameObject) == true)
+            {
+                var meshManager = FindFirstObjectByType<destructibleGlobalMeshManager>();
+                meshManager.RepairMeshSegment(hit.collider.gameObject);
             }
             // Check if we moved enough to spawn a new "weld" point
             else if (Vector3.Distance(hit.point, lastHitPosition) > spawnDistance)
