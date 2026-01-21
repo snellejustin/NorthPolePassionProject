@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
 
     public GameObject lanceObject;
     public GameObject xrRayInteractorObject;
+    public destructibleGlobalMeshManager destructionManager;
 
     void Start()
     {
@@ -22,7 +23,7 @@ public class GameManager : MonoBehaviour
         if (spawner.isSpawning)
         {
             // Count active enemies
-            int enemyCount = FindObjectsOfType<enemy>().Length;
+            int enemyCount = FindObjectsByType<enemy>(FindObjectsSortMode.None).Length;
             
             if (enemyCount >= maxEnemies)
             {
@@ -39,6 +40,7 @@ public class GameManager : MonoBehaviour
         
         if(lanceObject) lanceObject.SetActive(true);
         if(xrRayInteractorObject) xrRayInteractorObject.SetActive(false);
+        if(destructionManager) destructionManager.SetDestructionActive(true);
     }
 
     public void GameOver()
@@ -48,6 +50,7 @@ public class GameManager : MonoBehaviour
 
         if(lanceObject) lanceObject.SetActive(false);
         if(xrRayInteractorObject) xrRayInteractorObject.SetActive(true);
+        if(destructionManager) destructionManager.SetDestructionActive(false);
     }
 
     public void RestartGame()
@@ -68,5 +71,6 @@ public class GameManager : MonoBehaviour
 
         if(lanceObject) lanceObject.SetActive(false);
         if(xrRayInteractorObject) xrRayInteractorObject.SetActive(true);
+        if(destructionManager) destructionManager.SetDestructionActive(false);
     }
 }

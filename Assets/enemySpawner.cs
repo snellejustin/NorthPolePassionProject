@@ -3,7 +3,7 @@ using Meta.XR.MRUtilityKit;
 
 public class enemySpawner : MonoBehaviour
 {
-    public float spawnTimer = 1;
+    public float spawnTimer = 2;
     public GameObject prefabToSpawn;
     public float spawnRadius = 3;
     private float timer;

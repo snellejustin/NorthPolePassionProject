@@ -45,11 +45,11 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     - _XRMotionVectorsPass: 1
-    - _fresnelPower: 2.15
-    - _metallic: 0.334
-    - _normals: 2.96
-    - _refractionAmount: 0.51
-    - _smoothness: 0.584
+    - _fresnelPower: 0.5
+    - _metallic: 0.488
+    - _normals: 3
+    - _refractionAmount: 0.13
+    - _smoothness: 0.695
     m_Colors:
     - _Color: {r: 0, g: 0.2723597, b: 0.5019608, a: 1}
     - _fresnelColor: {r: 0.6828016, g: 1.5141883, b: 1.8113209, a: 1}
