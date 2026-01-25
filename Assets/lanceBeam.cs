@@ -14,6 +14,14 @@ public class lanceBeam : MonoBehaviour
     [Header("Welding UI")]
     public RepairProgressUI repairHUD; 
 
+    [Header("Heat & Cooldown")]
+    public CooldownUI cooldownHUD;
+    public float maxHeatTime = 5f; 
+    public float coolingRateMultiplier = 1f; 
+    
+    private float currentHeat = 0f; 
+    private bool isOverheated = false;
+
     private LineRenderer currentLine;
     private Vector3 lastHitPosition;
 
@@ -27,15 +35,20 @@ public class lanceBeam : MonoBehaviour
     void Start()
     {
         if (repairHUD) repairHUD.Hide();
+        if (cooldownHUD) cooldownHUD.SetProgress(0, false);
     }
 
     void Update()
     {
-        if (OVRInput.GetDown(shootingButton))
+        HandleHeat();
+
+        bool canShoot = !isOverheated && currentHeat < 1.0f;
+
+        if (canShoot && OVRInput.GetDown(shootingButton))
         {
             StartShooting();
         }
-        else if (OVRInput.GetUp(shootingButton))
+        else if (OVRInput.GetUp(shootingButton) || (isOverheated && currentLine != null))
         {
             StopShooting();
         }
@@ -43,6 +56,36 @@ public class lanceBeam : MonoBehaviour
         if (currentLine != null)
         {
             UpdateBeam();
+        }
+    }
+
+    private void HandleHeat()
+    {
+        if (currentLine != null && !isOverheated)
+        {
+            // Heating up
+            currentHeat += Time.deltaTime / maxHeatTime;
+            if (currentHeat >= 1f)
+            {
+                currentHeat = 1f;
+                isOverheated = true;
+                // StopShooting will be called in Update loop next check
+            }
+        }
+        else
+        {
+            // Cooling down
+            currentHeat -= (Time.deltaTime / maxHeatTime) * coolingRateMultiplier;
+            if (currentHeat <= 0f)
+            {
+                currentHeat = 0f;
+                isOverheated = false;
+            }
+        }
+
+        if (cooldownHUD)
+        {
+            cooldownHUD.SetProgress(currentHeat, isOverheated);
         }
     }
 
