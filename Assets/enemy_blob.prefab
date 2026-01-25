@@ -71,7 +71,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::enemy
   animator: {fileID: 9009809401440269910}
   agent: {fileID: 1119889575550386881}
-  speed: 1
+  speed: 0.4
 --- !u!95 &9009809401440269910
 Animator:
   serializedVersion: 7

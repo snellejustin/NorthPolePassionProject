@@ -104,9 +104,26 @@ public class destructibleGlobalMeshManager : MonoBehaviour
         }
     }
 
+    public GameObject GetHitboxFromObject(GameObject obj)
+    {
+        if (obj == null) return null;
+
+        // Search up the hierarchy to see if this object or any parent is a registered hitbox
+        Transform current = obj.transform;
+        while (current != null)
+        {
+            if (hitboxToSegmentMap.ContainsKey(current.gameObject))
+            {
+                return current.gameObject;
+            }
+            current = current.parent;
+        }
+        return null;
+    }
+
     public bool IsHitbox(GameObject obj)
     {
-        return hitboxToSegmentMap.ContainsKey(obj);
+        return GetHitboxFromObject(obj) != null;
     }
 
     private void DestroyRandomSegment()

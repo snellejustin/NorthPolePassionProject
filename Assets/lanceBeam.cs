@@ -12,7 +12,7 @@ public class lanceBeam : MonoBehaviour
     public AudioClip shootingAudioClip;
     
     [Header("Welding UI")]
-    public RepairProgressUI repairHUD; // The one and ONLY HUD we use
+    public RepairProgressUI repairHUD; 
 
     private LineRenderer currentLine;
     private Vector3 lastHitPosition;
@@ -48,8 +48,11 @@ public class lanceBeam : MonoBehaviour
 
     private void StartShooting()
     {
-        audioSource.Stop();
-        audioSource.PlayOneShot(shootingAudioClip);
+        if (audioSource)
+        {
+            audioSource.Stop();
+            audioSource.PlayOneShot(shootingAudioClip);
+        }
         
         if (currentLine == null)
         {
@@ -62,7 +65,7 @@ public class lanceBeam : MonoBehaviour
 
     private void StopShooting()
     {
-        audioSource.Stop();
+        if (audioSource) audioSource.Stop();
         
         if (currentLine != null)
         {
@@ -102,55 +105,52 @@ public class lanceBeam : MonoBehaviour
             {
                 hit.collider.enabled = false;
                 enemyScript.Kill();
-                ResetWeldProgress(); // Reset if we hit an enemy instead
+                ResetWeldProgress();
             }
-            else if (FindFirstObjectByType<destructibleGlobalMeshManager>()?.IsHitbox(hit.collider.gameObject) == true)
+            else 
             {
                 var meshManager = FindFirstObjectByType<destructibleGlobalMeshManager>();
-                GameObject hitbox = hit.collider.gameObject;
+                GameObject hitboxRoot = meshManager != null ? meshManager.GetHitboxFromObject(hit.collider.gameObject) : null;
 
-                if (currentWeldTarget != hitbox)
+                if (hitboxRoot != null)
                 {
-                    // Switched segments or started new one, reset progress
-                    currentWeldTarget = hitbox;
-                    currentWeldProgress = 0f;
+                    if (currentWeldTarget != hitboxRoot)
+                    {
+                        currentWeldTarget = hitboxRoot;
+                        currentWeldProgress = 0f;
+                    }
+
+                    currentWeldProgress += Time.deltaTime;
+                    float progressPercent = Mathf.Clamp01(currentWeldProgress / weldDuration);
+                    
+                    if (repairHUD)
+                    {
+                        repairHUD.Show();
+                        repairHUD.SetProgress(progressPercent);
+                    }
+
+                    if (currentWeldProgress >= weldDuration)
+                    {
+                        meshManager.RepairMeshSegment(currentWeldTarget);
+                        ResetWeldProgress();
+                    }
                 }
-
-                // Increase Progress
-                currentWeldProgress += Time.deltaTime;
-                float progressPercent = Mathf.Clamp01(currentWeldProgress / weldDuration);
-                
-                // Update the single Global HUD
-                if (repairHUD)
+                else
                 {
-                    repairHUD.Show();
-                    repairHUD.SetProgress(progressPercent);
-                }
+                    ResetWeldProgress();
 
-                // Complete Weld
-                if (currentWeldProgress >= weldDuration)
-                {
-                    meshManager.RepairMeshSegment(currentWeldTarget);
-                    ResetWeldProgress(); // Hide and Clear
-                }
-            }
-            else
-            {
-                // Hit something else (ground/wall but not hitbox)
-                ResetWeldProgress();
-
-                if (Vector3.Distance(hit.point, lastHitPosition) > spawnDistance)
-                {
-                    Quaternion rotation = Quaternion.LookRotation(-hit.normal);
-                    GameObject heatImpact = Instantiate(heatImpactPrefab, hit.point, rotation);
-                    Destroy(heatImpact, 1f);
-                    lastHitPosition = hit.point;
+                    if (Vector3.Distance(hit.point, lastHitPosition) > spawnDistance)
+                    {
+                        Quaternion rotation = Quaternion.LookRotation(-hit.normal);
+                        GameObject heatImpact = Instantiate(heatImpactPrefab, hit.point, rotation);
+                        Destroy(heatImpact, 1f);
+                        lastHitPosition = hit.point;
+                    }
                 }
             }
         }
         else
         {
-            // Missed everything
             endPoint = shootingPoint.position + shootingPoint.forward * maxLineDistance;
             lastHitPosition = Vector3.zero;
             ResetWeldProgress();

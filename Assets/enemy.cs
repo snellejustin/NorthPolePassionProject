@@ -6,7 +6,7 @@ public class enemy : MonoBehaviour
 {
     public Animator animator;
     public NavMeshAgent agent;
-    public float speed = 1;
+    public float speed = 0.4f; // Decreased from 1 for testing
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {

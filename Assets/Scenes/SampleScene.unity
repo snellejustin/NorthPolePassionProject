@@ -2682,7 +2682,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbad126bc508148749941ff41b11fd6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  spawnTimer: 1
+  spawnTimer: 5
   prefabToSpawn: {fileID: 9079584028516894883, guid: 3fcdff7406d2c4c00aa9cb28d080ac13, type: 3}
   spawnRadius: 3
   minEdgeDistance: 0.3

@@ -17,10 +17,22 @@ public class RepairProgressUI : MonoBehaviour
 
     public void SetProgress(float progress)
     {
-        currentProgress = progress;
+        currentProgress = Mathf.Clamp01(progress);
         if (progressImage)
         {
             progressImage.fillAmount = currentProgress;
+
+            // Change color: Red -> Yellow -> Green
+            if (currentProgress < 0.5f)
+            {
+                // Red to Yellow
+                progressImage.color = Color.Lerp(Color.red, Color.yellow, currentProgress * 2f);
+            }
+            else
+            {
+                // Yellow to Green
+                progressImage.color = Color.Lerp(Color.yellow, Color.green, (currentProgress - 0.5f) * 2f);
+            }
         }
 
         // Show if we have some progress, hide if 0 (optional, or keep visible)
