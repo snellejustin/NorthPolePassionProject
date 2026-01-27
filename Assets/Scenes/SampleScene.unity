@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 0}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -275,7 +275,7 @@ MonoBehaviour:
   shootingAudioClip: {fileID: 8300000, guid: c9730a3aa45814a6fa10f99b628dc16c, type: 3}
   repairHUD: {fileID: 793498918}
   cooldownHUD: {fileID: 1055574388}
-  maxHeatTime: 3
+  maxHeatTime: 5
   coolingRateMultiplier: 1
   spawnDistance: 0.05
 --- !u!82 &43415987
@@ -404,7 +404,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18f96780bdfd5422285ac91f11d31742, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  spawner: {fileID: 1161499477}
   startCanvas: {fileID: 1473487373}
   gameOverCanvas: {fileID: 413256997}
   maxEnemies: 15
@@ -2849,58 +2848,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1070878047}
   m_CullTransparentMesh: 1
---- !u!1 &1161499476
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1161499478}
-  - component: {fileID: 1161499477}
-  m_Layer: 0
-  m_Name: enemy spawner
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1161499477
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1161499476}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fbad126bc508148749941ff41b11fd6d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
-  spawnTimer: 5
-  prefabToSpawn: {fileID: 9079584028516894883, guid: 3fcdff7406d2c4c00aa9cb28d080ac13, type: 3}
-  spawnRadius: 3
-  minEdgeDistance: 0.3
-  spawnLabels: 4
-  normalOffset: 0.5
-  spawnTry: 1000
-  isSpawning: 0
---- !u!4 &1161499478
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1161499476}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1203160890
 GameObject:
   m_ObjectHideFlags: 0
@@ -4032,7 +3979,7 @@ PrefabInstance:
     - target: {fileID: 5201637225824680237, guid: d211279b66f25334e984011a5ebfce5b, type: 3}
       propertyPath: _globalMeshMaterial
       value: 
-      objectReference: {fileID: 2100000, guid: aa858b291bd1e406d8350981d2064bff, type: 2}
+      objectReference: {fileID: 2100000, guid: 4a614760b02b74f6c897d6fd40bd82f5, type: 2}
     - target: {fileID: 5201637225824680238, guid: d211279b66f25334e984011a5ebfce5b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.26628
@@ -4097,11 +4044,13 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ddfeb57fd1874400ab53af50a4440f76, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: '::'
+  m_EditorClassIdentifier: Assembly-CSharp::destructibleGlobalMeshManager
   meshSpawner: {fileID: 1793879208}
   destructionInterval: 2
   repairBoxPrefab: {fileID: 7043340798136479627, guid: 64b4742022b4248b89e42cd7a82d01a9, type: 3}
-  repairBoxSpawnOffset: 0.2
+  repairBoxSpawnOffset: 0
+  enemyPrefab: {fileID: 9079584028516894883, guid: 3fcdff7406d2c4c00aa9cb28d080ac13, type: 3}
+  spawnBehindWallDistance: 4
 --- !u!114 &1793879208 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5201637225824680237, guid: d211279b66f25334e984011a5ebfce5b, type: 3}
@@ -4436,7 +4385,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SpawnOnStart: 1
-  MeshMaterial: {fileID: 2100000, guid: 599b01c5f1d17436c89b88cc04257314, type: 2}
+  MeshMaterial: {fileID: 2100000, guid: b51db210fe78df745a372851b3db949e, type: 2}
   BarycentricCoordinatesEnabled: 0
   Colliders: 1
   CutHoles: 0
@@ -4700,7 +4649,6 @@ SceneRoots:
   - {fileID: 1021913953}
   - {fileID: 32750602}
   - {fileID: 1964443715}
-  - {fileID: 1161499478}
   - {fileID: 902008509}
   - {fileID: 1986901942}
   - {fileID: 46001412}

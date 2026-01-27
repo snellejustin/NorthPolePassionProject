@@ -3,7 +3,8 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    public enemySpawner spawner;
+    // OUDE REFERENCE VERWIJDERD: public enemySpawner spawner;
+    
     public GameObject startCanvas;
     public GameObject gameOverCanvas;
     public int maxEnemies = 15;
@@ -12,6 +13,9 @@ public class GameManager : MonoBehaviour
     public GameObject xrRayInteractorObject;
     public destructibleGlobalMeshManager destructionManager;
 
+    // Nieuwe variabele om bij te houden of het spel bezig is
+    private bool isGameActive = false;
+
     void Start()
     {
         ShowStartScreen();
@@ -19,10 +23,11 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        // Only check for game over if the game is running
-        if (spawner.isSpawning)
+        // Check game over conditie alleen als het spel actief is
+        if (isGameActive)
         {
-            // Count active enemies
+            // Tel actieve enemies (dit werkt nog steeds hetzelfde)
+            // Let op: Zorg dat je enemy.cs script de class naam 'enemy' heeft (kleine letter e zoals in je eerdere code)
             int enemyCount = FindObjectsByType<enemy>(FindObjectsSortMode.None).Length;
             
             if (enemyCount >= maxEnemies)
@@ -36,20 +41,24 @@ public class GameManager : MonoBehaviour
     {
         startCanvas.SetActive(false);
         gameOverCanvas.SetActive(false);
-        spawner.isSpawning = true;
+        
+        isGameActive = true; // We starten het spel
         
         if(lanceObject) lanceObject.SetActive(true);
         if(xrRayInteractorObject) xrRayInteractorObject.SetActive(false);
+        
+        // Dit start nu de destructie EN de enemy spawning
         if(destructionManager) destructionManager.SetDestructionActive(true);
     }
 
     public void GameOver()
     {
-        spawner.isSpawning = false;
+        isGameActive = false; // We stoppen het spel
         gameOverCanvas.SetActive(true);
 
         if(lanceObject) lanceObject.SetActive(false);
         if(xrRayInteractorObject) xrRayInteractorObject.SetActive(true);
+        
         if(destructionManager) destructionManager.SetDestructionActive(false);
     }
 
@@ -67,7 +76,8 @@ public class GameManager : MonoBehaviour
     {
         startCanvas.SetActive(true);
         gameOverCanvas.SetActive(false);
-        spawner.isSpawning = false;
+        
+        isGameActive = false;
 
         if(lanceObject) lanceObject.SetActive(false);
         if(xrRayInteractorObject) xrRayInteractorObject.SetActive(true);
