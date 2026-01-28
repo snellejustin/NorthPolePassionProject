@@ -4385,7 +4385,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SpawnOnStart: 1
-  MeshMaterial: {fileID: 2100000, guid: b51db210fe78df745a372851b3db949e, type: 2}
+  MeshMaterial: {fileID: 2100000, guid: 4a614760b02b74f6c897d6fd40bd82f5, type: 2}
   BarycentricCoordinatesEnabled: 0
   Colliders: 1
   CutHoles: 0

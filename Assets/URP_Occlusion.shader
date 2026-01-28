@@ -5,7 +5,8 @@ Shader "Custom/URP_Occlusion"
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" "Queue"="Geometry-100" "RenderPipeline" = "UniversalPipeline" }
+        // Render EARLY (in Background/Geometry-2000) to ensure we fill Depth before any transparent effects run
+        Tags { "RenderType"="Opaque" "Queue"="Geometry-2000" "RenderPipeline" = "UniversalPipeline" }
         LOD 100
 
         Pass
@@ -16,8 +17,8 @@ Shader "Custom/URP_Occlusion"
             ColorMask 0 // Do not draw any color (Invisible)
             ZWrite On   // Write to Depth Buffer (Solid obstacle)
             
-            // FIX: Push depth back slightly to prevent Z-fighting with decals/beams on the surface
-            Offset 1, 1 
+            // Offset removed: We are handling visual offset in lanceBeam.cs via script now (2cm bias)
+            // This ensures the depth buffer is 'accurate' to the wall position.
             
             HLSLPROGRAM
             #pragma vertex vert

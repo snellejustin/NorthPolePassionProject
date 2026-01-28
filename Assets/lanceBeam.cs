@@ -25,7 +25,7 @@ public class lanceBeam : MonoBehaviour
     private LineRenderer currentLine;
     private Vector3 lastHitPosition;
 
-    public float spawnDistance = 0.05f; 
+    public float spawnDistance = 0.05f; // Adjust this for denser/sparser trail
     
     // Welding Logic
     private float currentWeldProgress = 0f;
@@ -185,7 +185,11 @@ public class lanceBeam : MonoBehaviour
                     if (Vector3.Distance(hit.point, lastHitPosition) > spawnDistance)
                     {
                         Quaternion rotation = Quaternion.LookRotation(-hit.normal);
-                        GameObject heatImpact = Instantiate(heatImpactPrefab, hit.point, rotation);
+                        
+                        // FIX: Til de impact 2cm van de muur af om Z-fighting met de Occlusion Mesh te voorkomen
+                        Vector3 spawnPos = hit.point + (hit.normal * 0.02f);
+                        
+                        GameObject heatImpact = Instantiate(heatImpactPrefab, spawnPos, rotation);
                         Destroy(heatImpact, 1f);
                         lastHitPosition = hit.point;
                     }
