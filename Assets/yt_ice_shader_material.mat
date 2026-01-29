@@ -13,7 +13,7 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
-  m_LightmapFlags: 2
+  m_LightmapFlags: 1
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: 3000
@@ -50,10 +50,10 @@ Material:
     - _normals: 3
     - _refractionAmount: 0.13
     - _smoothness: 0.695
-    - _wave_speed: 0.3
+    - _wave_speed: 0.08
     - _wave_strength: 8.15
-    - _wobble_amount: 0.09
-    - _wobble_frequency: 2.58
+    - _wobble_amount: 0.01
+    - _wobble_frequency: 17.59
     m_Colors:
     - _Color: {r: 0, g: 0.2723597, b: 0.5019608, a: 1}
     - _fresnelColor: {r: 0.6828016, g: 1.5141883, b: 1.8113209, a: 1}

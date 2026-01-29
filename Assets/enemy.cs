@@ -9,16 +9,23 @@ public class enemy : MonoBehaviour
 
     // BREACH LOGIC VARIABLES
     private bool isBreaching = false;
-    private bool isFalling = false; // Nieuwe fase voor het zakken
+    private bool isFalling = false;
     private Vector3 breachTargetPosition;
 
     void Start()
     {
-        // Auto-assign agent if missing
         if (agent == null) agent = GetComponent<NavMeshAgent>();
+        
+        // Register enemy for frost effect
+        FrostEffectController.ActiveEnemyCount++;
     }
 
-    // Update is called once per frame
+    void OnDestroy()
+    {
+        // Unregister enemy
+        FrostEffectController.ActiveEnemyCount--;
+    }
+
     void Update()
     {
         // 1. PHASE-IN LOGIC (Breaching & Falling)
@@ -27,26 +34,21 @@ public class enemy : MonoBehaviour
             // STAP 1: Door de muur komen
             if (!isFalling)
             {
-                // Beweeg horizontaal naar binnen
                 transform.position = Vector3.MoveTowards(transform.position, breachTargetPosition, speed * Time.deltaTime);
 
-                // Zijn we door het gat heen? (afstand check)
                 if (Vector3.Distance(transform.position, breachTargetPosition) < 0.1f)
                 {
-                    // Ja, we zijn binnen! Nu kijken waar de vloer is.
                     StartFalling();
                 }
             }
             // STAP 2: Naar beneden glijden
             else
             {
-                // Beweeg naar het punt op de vloer (breachTargetPosition is nu de vloer)
-                // We doen speed * 2 zodat hij wat sneller valt dan dat hij kruipt (zwaartekracht effect)
                 transform.position = Vector3.MoveTowards(transform.position, breachTargetPosition, (speed * 2f) * Time.deltaTime);
 
                 if (Vector3.Distance(transform.position, breachTargetPosition) < 0.1f)
                 {
-                    CompleteBreach(); // We zijn geland
+                    CompleteBreach();
                 }
             }
             return; 
@@ -58,43 +60,39 @@ public class enemy : MonoBehaviour
 
         if (Camera.main != null)
         {
-            Vector3 targetPosition = Camera.main.transform.position;
-            agent.SetDestination(targetPosition);
+            agent.SetDestination(Camera.main.transform.position);
             agent.speed = speed;
         }
     }
 
-    // Called by the Spawner/Manager when created behind a wall
     public void InitializeBreach(Vector3 targetRoomPos)
     {
         isBreaching = true;
-        isFalling = false; // Reset falling state
+        isFalling = false;
         agent.enabled = false; 
         
-        // Zet physics uit zodat we niet blijven haken aan de muur
+        // Disable physics/collision during breach
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
-        
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null) rb.isKinematic = true;
 
         breachTargetPosition = targetRoomPos;
-        // FORCE HORIZONTAL: Override Y to match current height so we don't climb/descend during breach
+        // Keep height same as spawn to ensure horizontal entry
         breachTargetPosition.y = transform.position.y;
     }
 
     private void StartFalling()
     {
-        // Zoek de vloer recht onder de enemy (tot 10 meter diep)
+        // Find floor directly below
         if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 10.0f, NavMesh.AllAreas))
         {
             isFalling = true;
-            breachTargetPosition = hit.position; // Nieuw doel is de vloer
+            breachTargetPosition = hit.position; 
         }
         else
         {
-            // Geen vloer gevonden? Dan maar direct aanzetten (failsafe)
-            CompleteBreach();
+            CompleteBreach(); // Failsafe
         }
     }
 
@@ -103,14 +101,12 @@ public class enemy : MonoBehaviour
         isBreaching = false;
         isFalling = false;
         
-        // Zet physics weer aan zodat we geraakt kunnen worden
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = true;
         
-        // Zet het brein aan
         agent.enabled = true; 
         
-        // Zeker weten dat hij op de navmesh staat
+        // Snap to floor
         if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 1.0f, NavMesh.AllAreas))
         {
             agent.Warp(hit.position);
@@ -125,6 +121,9 @@ public class enemy : MonoBehaviour
         
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false; 
+        
+        // Note: Do not decrement counter here, wait for OnDestroy
+        // This ensures the frost stays until the body disappears (if you destroy it later)
 
         if(animator) animator.SetTrigger("death");
         else Destroy(); 

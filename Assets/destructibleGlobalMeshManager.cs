@@ -6,7 +6,7 @@ using System.Collections; // Needed for Coroutines
 public class destructibleGlobalMeshManager : MonoBehaviour
 {
     public DestructibleGlobalMeshSpawner meshSpawner;
-    public float destructionInterval = 2.0f;
+    public float destructionInterval = 7.0f;
     
     private List<GameObject> segments = new List<GameObject>();
     private Dictionary<GameObject, GameObject> hitboxToSegmentMap = new Dictionary<GameObject, GameObject>();
