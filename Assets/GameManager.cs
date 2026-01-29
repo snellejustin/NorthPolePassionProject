@@ -3,8 +3,6 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    // OUDE REFERENCE VERWIJDERD: public enemySpawner spawner;
-    
     public GameObject startCanvas;
     public GameObject gameOverCanvas;
     public int maxEnemies = 15;
@@ -12,6 +10,9 @@ public class GameManager : MonoBehaviour
     public GameObject lanceObject;
     public GameObject xrRayInteractorObject;
     public destructibleGlobalMeshManager destructionManager;
+    
+    [Header("Effects")]
+    public AlarmSystem alarmSystem; // DRAG YOUR ALARM HUD HERE
 
     // Nieuwe variabele om bij te houden of het spel bezig is
     private bool isGameActive = false;
@@ -49,6 +50,9 @@ public class GameManager : MonoBehaviour
         
         // Dit start nu de destructie EN de enemy spawning
         if(destructionManager) destructionManager.SetDestructionActive(true);
+
+        // TRIGGER THE ALARM
+        if(alarmSystem) alarmSystem.TriggerAlarm("BREACH DETECTED");
     }
 
     public void GameOver()
