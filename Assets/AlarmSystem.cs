@@ -1,22 +1,22 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; // Needed for TextMeshPro
+using TMPro; 
 using System.Collections;
 
 public class AlarmSystem : MonoBehaviour
 {
     [Header("UI References")]
     public CanvasGroup alarmCanvasGroup; // We use this to fade/flicker everything at once
-    public TextMeshProUGUI alertText;    // The text component
+    public TextMeshProUGUI alertText;   
 
     [Header("Settings")]
-    public float duration = 4.0f;        // How long the alarm lasts
+    public float duration = 5.0f;        // How long the alarm lasts
     public float flickerSpeed = 5.0f;    // How fast it flashes
     public string startMessage = "BREACH DETECTED";
 
     void Start()
     {
-        // 1. Auto-find components if not assigned (Convenience)
+        // 1. Auto-find components if not assigned
         if (alarmCanvasGroup == null) alarmCanvasGroup = GetComponent<CanvasGroup>();
         if (alertText == null) alertText = GetComponentInChildren<TextMeshProUGUI>();
 
@@ -26,9 +26,6 @@ public class AlarmSystem : MonoBehaviour
             alarmCanvasGroup.alpha = 0f; 
             // DO NOT set gameObject.SetActive(false) here, or the script stops running!
         }
-
-        // REMOVED: TriggerAlarm(startMessage); 
-        // We wait for GameManager to call this now.
     }
 
     // Call this function later for waves: TriggerAlarm("WAVE 2 INCOMING");
@@ -67,9 +64,7 @@ public class AlarmSystem : MonoBehaviour
             yield return null;
         }
 
-        // Clean turn off
         alarmCanvasGroup.alpha = 0f;
-        // Now we can turn it off safely because the routine is done
         alarmCanvasGroup.gameObject.SetActive(false); 
     }
 }

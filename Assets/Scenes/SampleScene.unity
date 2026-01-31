@@ -312,6 +312,7 @@ MonoBehaviour:
   showDebugLogs: 1
   maxEnemiesForFullFreeze: 15
   minFrostIntensity: 0.2
+  maxFrostIntensity: 1.5
   smoothTime: 0.5
 --- !u!1 &74985807
 GameObject:
@@ -4331,7 +4332,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 638c59d0ffc894dc0be332a2eff4a7d6, type: 2}
+  - {fileID: 2100000, guid: d0d824fc413db4400804f13785b90a40, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

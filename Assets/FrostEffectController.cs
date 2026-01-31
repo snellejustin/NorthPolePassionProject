@@ -6,7 +6,7 @@ public class FrostEffectController : MonoBehaviour
 
     [Header("Setup")]
     public Renderer frostQuadRenderer; 
-    public string intensityPropertyName = "_FrostIntensity"; 
+    public string intensityPropertyName = "_VignetteIntensity"; 
 
     [Header("Testing")]
     public ControlMode controlMode = ControlMode.EnemyCount;
@@ -15,9 +15,9 @@ public class FrostEffectController : MonoBehaviour
     public bool showDebugLogs = false;
 
     [Header("Game Logic")]
-    public float maxEnemiesForFullFreeze = 5f; 
-    [Range(0f, 1f)]
-    public float minFrostIntensity = 0.2f; // Base frost level (always present)
+    public float maxEnemiesForFullFreeze = 15f; 
+    public float minFrostIntensity = 0.3f; // Base frost level (0.3 at 0 enemies)
+    public float maxFrostIntensity = 1.5f; // Max frost level (1.5 at 15 enemies)
     
     [Header("Smoothness Settings")]
     public float smoothTime = 0.5f; // Time (seconds) to reach the target value. Higher = Smoother/Slower.
@@ -50,10 +50,7 @@ public class FrostEffectController : MonoBehaviour
         // 2. Get Material Instance
         if (frostQuadRenderer != null)
         {
-            // Accessing .material creates a runtime instance automatically.
             _targetMaterial = frostQuadRenderer.material;
-            
-            // Fix: Disable shadows on the frost quad (prevents dark squares)
             frostQuadRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             frostQuadRenderer.receiveShadows = false;
         }
@@ -61,8 +58,6 @@ public class FrostEffectController : MonoBehaviour
         {
             Debug.LogError("[FrostEffectController] CRITICAL: No FrostVisor Renderer found!");
         }
-
-        // Reset to minimum intensity immediately so we start with some frost
         if (_targetMaterial != null) 
         {
             currentIntensity = minFrostIntensity;
@@ -74,7 +69,6 @@ public class FrostEffectController : MonoBehaviour
     {
         if (_targetMaterial == null) return;
 
-        // --- KIES JE MODUS ---
         switch (controlMode)
         {
             case ControlMode.EnemyCount:
@@ -83,13 +77,9 @@ public class FrostEffectController : MonoBehaviour
                 
                 // Wortel curve voor snellere start
                 float curve = Mathf.Pow(linearFraction, 0.5f); 
+                targetIntensity = Mathf.Lerp(minFrostIntensity, maxFrostIntensity, curve);
                 
-                // Remap the curve: Instead of 0 to 1, we go from Min to 1.
-                // 0 enemies = minFrostIntensity (0.2)
-                // Max enemies = 1.0
-                targetIntensity = Mathf.Lerp(minFrostIntensity, 1.0f, curve);
-                
-                if (showDebugLogs && Time.frameCount % 60 == 0) // Log elke seconde
+                if (showDebugLogs && Time.frameCount % 60 == 0)
                 {
                     Debug.Log($"[Frost] Enemies: {count} | Target: {targetIntensity:F2} | Current: {currentIntensity:F2}");
                 }
@@ -104,12 +94,7 @@ public class FrostEffectController : MonoBehaviour
                 targetIntensity = manualIntensity;
                 break;
         }
-
-        // --- SMOOTHING LOGIC ---
-        // SmoothDamp creates a spring-like ease-in/ease-out effect.
         currentIntensity = Mathf.SmoothDamp(currentIntensity, targetIntensity, ref currentVelocity, smoothTime);
-        
-        // Stuur naar shader
         _targetMaterial.SetFloat(intensityPropertyName, currentIntensity);
     }
     
