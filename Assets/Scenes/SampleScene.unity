@@ -305,14 +305,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4aa0ea5a82ce64e62821244f3d1290a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FrostEffectController
-  frostQuadRenderer: {fileID: 0}
-  intensityPropertyName: _FrostIntensity
+  frostQuadRenderer: {fileID: 1693158045}
+  intensityPropertyName: _VignetteIntensity
   controlMode: 0
   manualIntensity: 0.51
   showDebugLogs: 1
   maxEnemiesForFullFreeze: 15
-  minFrostIntensity: 0.2
-  maxFrostIntensity: 1.5
+  maxFrostIntensity: 1.7
   smoothTime: 0.5
 --- !u!1 &74985807
 GameObject:

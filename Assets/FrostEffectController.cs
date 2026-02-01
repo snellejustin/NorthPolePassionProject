@@ -10,14 +10,13 @@ public class FrostEffectController : MonoBehaviour
 
     [Header("Testing")]
     public ControlMode controlMode = ControlMode.EnemyCount;
-    [Range(0f, 1f)]
+    [Range(0f, 1.7f)]
     public float manualIntensity = 0.5f;
     public bool showDebugLogs = false;
 
     [Header("Game Logic")]
     public float maxEnemiesForFullFreeze = 15f; 
-    public float minFrostIntensity = 0.3f; // Base frost level (0.3 at 0 enemies)
-    public float maxFrostIntensity = 1.5f; // Max frost level (1.5 at 15 enemies)
+    public float maxFrostIntensity = 2f; // New Max Cap
     
     [Header("Smoothness Settings")]
     public float smoothTime = 0.5f; // Time (seconds) to reach the target value. Higher = Smoother/Slower.
@@ -58,10 +57,20 @@ public class FrostEffectController : MonoBehaviour
         {
             Debug.LogError("[FrostEffectController] CRITICAL: No FrostVisor Renderer found!");
         }
+
+        // Reset and Verify Property
         if (_targetMaterial != null) 
         {
-            currentIntensity = minFrostIntensity;
-            _targetMaterial.SetFloat(intensityPropertyName, minFrostIntensity);
+            if (_targetMaterial.HasProperty(intensityPropertyName))
+            {
+                _targetMaterial.SetFloat(intensityPropertyName, 0f);
+            }
+            else
+            {
+                Debug.LogError($"[FrostEffectController] Property '{intensityPropertyName}' NOT found on material '{_targetMaterial.name}'! " +
+                               $"Please check the 'Reference' name in Shader Graph (Blackboard > VignetteIntensity > ReferenceName). " +
+                               $"Try removing the underscore in the Inspector.");
+            }
         }
     }
 
@@ -73,11 +82,12 @@ public class FrostEffectController : MonoBehaviour
         {
             case ControlMode.EnemyCount:
                 int count = ActiveEnemyCount;
-                float linearFraction = Mathf.Clamp01((float)count / maxEnemiesForFullFreeze);
                 
-                // Wortel curve voor snellere start
-                float curve = Mathf.Pow(linearFraction, 0.5f); 
-                targetIntensity = Mathf.Lerp(minFrostIntensity, maxFrostIntensity, curve);
+                // LINEAR LOGIC: (count / max) * 1.7
+                // 0 enemies = 0.0
+                // 15 enemies = 1.7
+                float fraction = Mathf.Clamp01((float)count / maxEnemiesForFullFreeze);
+                targetIntensity = fraction * maxFrostIntensity;
                 
                 if (showDebugLogs && Time.frameCount % 60 == 0)
                 {
@@ -86,8 +96,8 @@ public class FrostEffectController : MonoBehaviour
                 break;
 
             case ControlMode.TimeLoop:
-                // Gaat van Min naar 1 en terug
-                targetIntensity = Mathf.Lerp(minFrostIntensity, 1.0f, Mathf.PingPong(Time.time * 0.5f, 1.0f));
+                // Gaat van 0 naar 1 en terug
+                targetIntensity = Mathf.Lerp(0f, 1.0f, Mathf.PingPong(Time.time * 0.5f, 1.0f));
                 break;
 
             case ControlMode.ManualSlider:

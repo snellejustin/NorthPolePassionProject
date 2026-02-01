@@ -71,11 +71,11 @@ Material:
     - _SrcBlend: 5
     - _SrcBlendAlpha: 1
     - _Surface: 1
-    - _VignetteIntensity: 1.3
-    - _VignetteRadiusPower: 2.4
-    - _VoronoiPower: -0.21
-    - _VoronoiScale: 8.93
-    - _VoronoiSpeed: 0.39
+    - _VignetteIntensity: 1.7
+    - _VignetteRadiusPower: 1.37
+    - _VoronoiPower: -0.24
+    - _VoronoiScale: 17.07
+    - _VoronoiSpeed: 0.46
     - _XRMotionVectorsPass: 1
     - _ZTest: 4
     - _ZWrite: 0
