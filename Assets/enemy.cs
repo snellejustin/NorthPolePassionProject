@@ -6,6 +6,9 @@ public class enemy : MonoBehaviour
     public Animator animator;
     public NavMeshAgent agent;
     public float speed = 0.4f; 
+    
+    [Header("Audio")]
+    public AudioClip[] deathSounds;
 
     // BREACH LOGIC VARIABLES
     private bool isBreaching = false;
@@ -121,6 +124,16 @@ public class enemy : MonoBehaviour
         
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false; 
+        
+        // Play Random Death Sound
+        if (deathSounds != null && deathSounds.Length > 0)
+        {
+            AudioClip clip = deathSounds[Random.Range(0, deathSounds.Length)];
+            if (clip != null)
+            {
+                AudioSource.PlayClipAtPoint(clip, transform.position);
+            }
+        }
         
         // Note: Do not decrement counter here, wait for OnDestroy
         // This ensures the frost stays until the body disappears (if you destroy it later)

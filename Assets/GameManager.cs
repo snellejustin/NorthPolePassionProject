@@ -14,11 +14,24 @@ public class GameManager : MonoBehaviour
     [Header("Effects")]
     public AlarmSystem alarmSystem; // DRAG YOUR ALARM HUD HERE
 
+    [Header("Audio")]
+    public AudioSource musicSource;
+    public AudioSource sfxSource;
+    public AudioClip menuMusic;
+    public AudioClip gameplayMusic;
+    public AudioClip buttonSound;
+
     // Nieuwe variabele om bij te houden of het spel bezig is
     private bool isGameActive = false;
 
     void Start()
     {
+        if (musicSource && menuMusic)
+        {
+            musicSource.clip = menuMusic;
+            musicSource.loop = true;
+            musicSource.Play();
+        }
         ShowStartScreen();
     }
 
@@ -40,6 +53,11 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
+        PlayButtonSound();
+
+        // Fade out menu music, then start game music
+        StartCoroutine(SwitchMusic(gameplayMusic, 1.0f));
+
         startCanvas.SetActive(false);
         gameOverCanvas.SetActive(false);
         
@@ -68,12 +86,55 @@ public class GameManager : MonoBehaviour
 
     public void RestartGame()
     {
+        PlayButtonSound();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void QuitGame()
     {
+        PlayButtonSound();
         Application.Quit();
+    }
+
+    private void PlayButtonSound()
+    {
+        if (sfxSource && buttonSound)
+        {
+            sfxSource.PlayOneShot(buttonSound);
+        }
+    }
+
+    private System.Collections.IEnumerator SwitchMusic(AudioClip newClip, float fadeDuration)
+    {
+        if (musicSource == null) yield break;
+
+        float startVolume = musicSource.volume;
+
+        // Fade Out
+        for (float t = 0; t < fadeDuration; t += Time.deltaTime)
+        {
+            musicSource.volume = Mathf.Lerp(startVolume, 0, t / fadeDuration);
+            yield return null;
+        }
+        
+        musicSource.volume = 0;
+        musicSource.Stop();
+
+        // Swap and Play
+        if (newClip != null)
+        {
+            musicSource.clip = newClip;
+            musicSource.Play();
+            
+            // Fade In (Optional, but smoother)
+            // We reuse the original volume target
+            for (float t = 0; t < fadeDuration; t += Time.deltaTime)
+            {
+                musicSource.volume = Mathf.Lerp(0, startVolume, t / fadeDuration);
+                yield return null;
+            }
+            musicSource.volume = startVolume;
+        }
     }
 
     private void ShowStartScreen()

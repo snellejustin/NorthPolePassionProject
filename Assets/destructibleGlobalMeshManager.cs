@@ -19,6 +19,10 @@ public class destructibleGlobalMeshManager : MonoBehaviour
     public GameObject enemyPrefab; 
     public float spawnBehindWallDistance = 4.0f; // Increased to 4m for better visibility test 
 
+    [Header("Audio")]
+    public AudioClip[] wallCrackSounds;
+    public AudioClip wallHealSound;
+
     private DestructibleMeshComponent currentComponent;
     private float timer;
     private bool isDestructionActive = false;
@@ -82,6 +86,18 @@ public class destructibleGlobalMeshManager : MonoBehaviour
         if(segments.Remove(segment) && currentComponent.ReservedSegment != segment)
         {
             segment.SetActive(false);
+
+            // Play Random Crack Sound
+            if (wallCrackSounds != null && wallCrackSounds.Length > 0)
+            {
+                AudioClip clip = wallCrackSounds[Random.Range(0, wallCrackSounds.Length)];
+                if (clip != null)
+                {
+                    Renderer r = segment.GetComponent<Renderer>();
+                    Vector3 playPos = r ? r.bounds.center : segment.transform.position;
+                    AudioSource.PlayClipAtPoint(clip, playPos);
+                }
+            }
 
             // --- 1. SPAWN REPAIR HITBOX ---
             GameObject hitbox;
@@ -177,6 +193,14 @@ public class destructibleGlobalMeshManager : MonoBehaviour
         if (hitboxToSegmentMap.TryGetValue(hitbox, out GameObject segment))
         {
             segment.SetActive(true);
+
+            if (wallHealSound != null)
+            {
+                Renderer r = segment.GetComponent<Renderer>();
+                Vector3 playPos = r ? r.bounds.center : segment.transform.position;
+                AudioSource.PlayClipAtPoint(wallHealSound, playPos);
+            }
+
             segments.Add(segment);
             hitboxToSegmentMap.Remove(hitbox);
             Destroy(hitbox);

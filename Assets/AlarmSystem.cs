@@ -14,11 +14,16 @@ public class AlarmSystem : MonoBehaviour
     public float flickerSpeed = 5.0f;    // How fast it flashes
     public string startMessage = "BREACH DETECTED";
 
+    [Header("Audio")]
+    public AudioClip alarmSound;
+    public AudioSource audioSource;
+
     void Start()
     {
         // 1. Auto-find components if not assigned
         if (alarmCanvasGroup == null) alarmCanvasGroup = GetComponent<CanvasGroup>();
         if (alertText == null) alertText = GetComponentInChildren<TextMeshProUGUI>();
+        if (audioSource == null) audioSource = GetComponent<AudioSource>();
 
         // 2. Ensure it starts hidden (BUT ACTIVE)
         if (alarmCanvasGroup != null)
@@ -48,20 +53,34 @@ public class AlarmSystem : MonoBehaviour
 
         if (alertText != null) alertText.text = message;
 
-        float timer = 0f;
+        // Ensure we start invisible
+        alarmCanvasGroup.alpha = 0f;
 
-        // Loop for the duration
-        while (timer < duration)
+        float elapsed = 0f;
+        float cycleDuration = 2.0f / flickerSpeed; // Time for one full 0->1->0 cycle
+
+        while (elapsed < duration)
         {
-            timer += Time.deltaTime;
+            // Play sound at start of pulse/cycle
+            if (audioSource != null && alarmSound != null)
+            {
+                audioSource.PlayOneShot(alarmSound);
+            }
 
-            // Math to create a sharp flickering effect (0 to 1)
-            float flicker = Mathf.PingPong(Time.time * flickerSpeed, 1.0f);
-            
-            // Keep it mostly visible, don't flicker to fully invisible (0.2 to 1.0)
-            alarmCanvasGroup.alpha = Mathf.Lerp(0.2f, 1.0f, flicker);
+            // Perform one visual cycle
+            float cycleTimer = 0f;
+            while (cycleTimer < cycleDuration && elapsed < duration)
+            {
+                cycleTimer += Time.deltaTime;
+                elapsed += Time.deltaTime;
 
-            yield return null;
+                // Sync flicker manually: 0 -> 1 -> 0
+                float t = cycleTimer / cycleDuration;
+                float flicker = Mathf.PingPong(t * 2.0f, 1.0f);
+
+                alarmCanvasGroup.alpha = Mathf.Lerp(0.2f, 1.0f, flicker);
+                yield return null;
+            }
         }
 
         alarmCanvasGroup.alpha = 0f;

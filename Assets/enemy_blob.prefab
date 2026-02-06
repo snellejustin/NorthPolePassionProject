@@ -72,6 +72,12 @@ MonoBehaviour:
   animator: {fileID: 9009809401440269910}
   agent: {fileID: 1119889575550386881}
   speed: 0.4
+  deathSounds:
+  - {fileID: 8300000, guid: d1bc4ed90a52c4df1b8618d5aad17e8d, type: 3}
+  - {fileID: 8300000, guid: 38b31f0f9769b4461a20482f9440122f, type: 3}
+  - {fileID: 8300000, guid: b6a90b4b547824904b0dc736aac33b67, type: 3}
+  - {fileID: 8300000, guid: f927fcb5962af40ddb1768e4ec94c0d9, type: 3}
+  - {fileID: 8300000, guid: f53f2dfb8719b46bb967057cf7eb55d1, type: 3}
 --- !u!95 &9009809401440269910
 Animator:
   serializedVersion: 7

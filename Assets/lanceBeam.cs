@@ -10,6 +10,7 @@ public class lanceBeam : MonoBehaviour
     public float maxLineDistance = 10;
     public AudioSource audioSource;
     public AudioClip shootingAudioClip;
+    public AudioClip errorSound;
     
     [Header("Welding UI")]
     public RepairProgressUI repairHUD; 
@@ -53,6 +54,11 @@ public class lanceBeam : MonoBehaviour
             StopShooting();
         }
 
+        if (isOverheated && OVRInput.GetDown(shootingButton))
+        {
+             if (audioSource && errorSound) audioSource.PlayOneShot(errorSound);
+        }
+
         if (currentLine != null)
         {
             UpdateBeam();
@@ -69,6 +75,7 @@ public class lanceBeam : MonoBehaviour
             {
                 currentHeat = 1f;
                 isOverheated = true;
+                if (audioSource && errorSound) audioSource.PlayOneShot(errorSound);
                 // StopShooting will be called in Update loop next check
             }
         }
