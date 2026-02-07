@@ -1,8 +1,7 @@
 using UnityEngine;
 using Meta.XR.MRUtilityKit;
-// Force Recompile
 using System.Collections.Generic;
-using System.Collections; // Needed for Coroutines
+using System.Collections; 
 
 public class destructibleGlobalMeshManager : MonoBehaviour
 {
@@ -18,10 +17,9 @@ public class destructibleGlobalMeshManager : MonoBehaviour
 
     [Header("Enemy Spawning")]
     public GameObject enemyPrefab; 
-    public float spawnBehindWallDistance = 4.0f; // Increased to 4m for better visibility test 
-    public float spawnBehindWallDistance = 4.0f; // Increased to 4m for better visibility test 
+    public float spawnBehindWallDistance = 4.0f; 
+
     
-    // Controlled by GameManager: Range of enemies per breach
     public int minEnemiesPerBreach = 1; 
     public int maxEnemiesPerBreach = 1; 
 
@@ -33,7 +31,6 @@ public class destructibleGlobalMeshManager : MonoBehaviour
     private float timer;
     private bool isDestructionActive = false;
 
-    // Events to notify GameManager
     public System.Action OnEnemySpawned;
     public System.Action OnSegmentBroken;
 
@@ -77,7 +74,6 @@ public class destructibleGlobalMeshManager : MonoBehaviour
             if (item.GetComponent<MeshCollider>() == null) item.AddComponent<MeshCollider>();
         }
 
-        // Fix Occlusion: Hide the original static walls so we can see through the holes
         DisableOriginalWallVisuals();
     }
 
@@ -89,8 +85,6 @@ public class destructibleGlobalMeshManager : MonoBehaviour
 
         foreach (var anchor in room.WallAnchors)
         {
-            // Disable MeshRenderers on the original wall anchors (and their children)
-            // This ensures the solid "real" wall doesn't block the view of the enemy behind the "destructible" wall
             var renderers = anchor.GetComponentsInChildren<MeshRenderer>();
             foreach (var r in renderers) r.enabled = false;
         }
@@ -102,7 +96,6 @@ public class destructibleGlobalMeshManager : MonoBehaviour
         {
             segment.SetActive(false);
 
-            // Play Random Crack Sound
             if (wallCrackSounds != null && wallCrackSounds.Length > 0)
             {
                 AudioClip clip = wallCrackSounds[Random.Range(0, wallCrackSounds.Length)];
@@ -114,7 +107,6 @@ public class destructibleGlobalMeshManager : MonoBehaviour
                 }
             }
 
-            // --- 1. SPAWN REPAIR HITBOX ---
             GameObject hitbox;
             if (repairBoxPrefab != null)
             {
@@ -139,43 +131,30 @@ public class destructibleGlobalMeshManager : MonoBehaviour
             }
             hitboxToSegmentMap.Add(hitbox, segment);
 
-            // Notify GameManager that a segment broke (used for wave progress)
             OnSegmentBroken?.Invoke();
 
-            // --- DELAY LOGIC START ---
-            // Hide the hitbox immediately so it doesn't block the enemy or the view
             hitbox.SetActive(false);
             
-            // Calculate random delay (8 to 15 seconds)
             float delay = Random.Range(8.0f, 15.0f);
             StartCoroutine(ActivateHitboxRoutine(hitbox, delay));
-            // -------------------------
 
-            // --- 2. SPAWN ENEMIES ---
             if (enemyPrefab != null)
             {
                 Vector3 wallCenter = (segRenderer != null) ? segRenderer.bounds.center : segment.transform.position;
                 Vector3 playerPos = Camera.main ? Camera.main.transform.position : Vector3.zero;
 
-                // Loop for multiple enemies (Randomized count)
-                int enemiesToSpawn = Random.Range(minEnemiesPerBreach, maxEnemiesPerBreach + 1); // +1 because Random.Range int is exclusive at max
+                int enemiesToSpawn = Random.Range(minEnemiesPerBreach, maxEnemiesPerBreach + 1); 
 
                 for (int i = 0; i < enemiesToSpawn; i++)
                 {
-                    // ROBUST LOGIC: Calculate direction from Player to Wall
                     Vector3 outwardDir = (wallCenter - playerPos);
                     
-                    // Flatten Y
                     outwardDir.y = 0;
                     outwardDir.Normalize();
                     
                     if(outwardDir == Vector3.zero) outwardDir = Vector3.forward;
-
-                    // Base Spawn Pos
                     Vector3 spawnPos = wallCenter + (outwardDir * spawnBehindWallDistance);
 
-                    // Add Random Offset for multiple enemies (or even single ones for variety)
-                    // We scramble X/Z relative to the world, simpler than local right vector calculation for now
                     if (enemiesToSpawn > 1 || i > 0)
                     {
                         float entropy = 1.5f; // Spread amount
@@ -183,10 +162,8 @@ public class destructibleGlobalMeshManager : MonoBehaviour
                         spawnPos += offset;
                     }
                     
-                    // Force height
                     spawnPos.y = wallCenter.y;
                     
-                    // Spawn enemy looking AT the wall
                     GameObject newEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.LookRotation(-outwardDir));
 
                     enemy enemyScript = newEnemy.GetComponent<enemy>();
@@ -196,19 +173,16 @@ public class destructibleGlobalMeshManager : MonoBehaviour
                         enemyScript.InitializeBreach(roomEntryPos);
                     }
 
-                    // Notify GameManager
                     OnEnemySpawned?.Invoke();
                 }
             }
         }
     }
 
-    // This makes the box appear after the enemy has (hopefully) fallen
     IEnumerator ActivateHitboxRoutine(GameObject hitbox, float delay)
     {
         yield return new WaitForSeconds(delay);
         
-        // Check if hitbox still exists (game might have ended)
         if (hitbox != null)
         {
             hitbox.SetActive(true);

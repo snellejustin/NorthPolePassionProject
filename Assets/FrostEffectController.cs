@@ -21,7 +21,6 @@ public class FrostEffectController : MonoBehaviour
     [Header("Smoothness Settings")]
     public float smoothTime = 0.5f; 
 
-    // STATIC COUNTER
     public static int ActiveEnemyCount = 0;
 
     private float targetIntensity = 0f;
@@ -31,14 +30,11 @@ public class FrostEffectController : MonoBehaviour
 
     void Start()
     {
-        // 1. Auto-find renderer if not assigned
         if (frostQuadRenderer == null)
         {
-            // Try to find child named FrostVisor
             Transform child = transform.Find("FrostVisor");
             if (child != null) frostQuadRenderer = child.GetComponent<Renderer>();
             
-            // Or try finding it in the scene (slower but robust)
             if (frostQuadRenderer == null)
             {
                 GameObject obj = GameObject.Find("FrostVisor");
@@ -46,7 +42,6 @@ public class FrostEffectController : MonoBehaviour
             }
         }
 
-        // 2. Get Material Instance
         if (frostQuadRenderer != null)
         {
             _targetMaterial = frostQuadRenderer.material;
@@ -58,7 +53,6 @@ public class FrostEffectController : MonoBehaviour
             Debug.LogError("[FrostEffectController] CRITICAL: No FrostVisor Renderer found!");
         }
 
-        // Reset and Verify Property
         if (_targetMaterial != null) 
         {
             if (_targetMaterial.HasProperty(intensityPropertyName))
@@ -81,14 +75,23 @@ public class FrostEffectController : MonoBehaviour
         switch (controlMode)
         {
             case ControlMode.EnemyCount:
-                int count = ActiveEnemyCount;
+                int count = 0;
+                GameManager gm = FindFirstObjectByType<GameManager>();
+                if (gm != null) 
+                {
+                    count = gm.CurrentStrikePoints;
+                }
+                else
+                {
+                    count = ActiveEnemyCount; 
+                }
                 
                 float fraction = Mathf.Clamp01((float)count / maxEnemiesForFullFreeze);
                 targetIntensity = fraction * maxFrostIntensity;
                 
                 if (showDebugLogs && Time.frameCount % 60 == 0)
                 {
-                    Debug.Log($"[Frost] Enemies: {count} | Target: {targetIntensity:F2} | Current: {currentIntensity:F2}");
+                    Debug.Log($"[Frost] Strike Points: {count} | Target: {targetIntensity:F2} | Current: {currentIntensity:F2}");
                 }
                 break;
 

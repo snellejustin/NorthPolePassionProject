@@ -32,23 +32,20 @@ public class GameManager : MonoBehaviour
     
     private int currentWave = 1;
 
-    // Wave Progress Tracking
     private int segmentsToSpawnCurrentWave;
     private int segmentsSpawnedCurrentWave;
     
     private float restorationTimer = 0f;
     
-    // SCORE SYSTEM
     public int score = 0;
-    
-    // Simple event if you want to update UI later
-    // public System.ActionOnScoreChanged; 
+    public TMPro.TMP_Text scoreText; 
+    public TMPro.TMP_Text gameOverScoreText; /
+
 
     void Start()
     {
         if (destructionManager != null)
         {
-            // destructionManager.OnEnemySpawned += OnEnemySpawnedHandler; // No longer needed for wave progress
             destructionManager.OnSegmentBroken += OnSegmentBrokenHandler;
         }
 
@@ -58,6 +55,18 @@ public class GameManager : MonoBehaviour
             musicSource.loop = true;
             musicSource.Play();
         }
+
+        if (scoreText == null)
+        {
+ 
+            GameObject stObj = GameObject.Find("Score Counter"); 
+            if (stObj != null)
+            {
+                 var tmp = stObj.GetComponentInChildren<TMPro.TMP_Text>();
+                 if (tmp != null) scoreText = tmp;
+            }
+        }
+
         ShowStartScreen();
     }
 
@@ -65,10 +74,8 @@ public class GameManager : MonoBehaviour
     {
         if (!isGameActive) return;
 
-        // 1. Check Lose Condition (Strike Points)
         CheckLoseCondition();
 
-        // 2. Handle Game Loop (Waves vs Restoration)
         if (isRestorationPhase)
         {
             restorationTimer -= Time.deltaTime;
@@ -79,14 +86,16 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // Wave is Active
             CheckWaveCompletion();
         }
     }
 
+    private bool isWaveEnding = false;
+
+    public int CurrentStrikePoints { get; private set; }
+
     private void CheckLoseCondition()
     {
-        // Broker pieces count as '2', Enemy counts as '1'
         int enemyCount = FindObjectsByType<enemy>(FindObjectsSortMode.None).Length;
         int brokenWalls = 0;
         
@@ -94,8 +103,8 @@ public class GameManager : MonoBehaviour
             brokenWalls = destructionManager.GetBrokenWallCount();
 
         int strikePoints = brokenWalls + enemyCount;
+        CurrentStrikePoints = strikePoints; 
 
-        // Optional: Update UI with strike points here if needed?
 
         if (strikePoints >= strikePointLimit)
         {
@@ -106,17 +115,15 @@ public class GameManager : MonoBehaviour
 
     private void CheckWaveCompletion()
     {
-        // 1. Have we spawned all wall breaks for this wave?
+        if (isWaveEnding || isRestorationPhase) return;
+
         if (segmentsSpawnedCurrentWave >= segmentsToSpawnCurrentWave)
         {
-            // Stop spawning new breaks
             if (destructionManager != null) destructionManager.SetDestructionActive(false);
 
-            // 2. Are all enemies dead?
             int enemyCount = FindObjectsByType<enemy>(FindObjectsSortMode.None).Length;
             if (enemyCount == 0)
             {
-                // Wait a few seconds BEFORE starting restoration
                 StartCoroutine(EndWaveRoutine());
             }
         }
@@ -125,39 +132,35 @@ public class GameManager : MonoBehaviour
     public void AddScore(int amount)
     {
         score += amount;
+        if (scoreText != null) scoreText.text = score.ToString();
         Debug.Log($"Score: {score}");
-        // OnScoreChanged?.Invoke();
     }
 
     private System.Collections.IEnumerator EndWaveRoutine()
     {
-        // Prevent double triggering
-        if (isRestorationPhase) yield break;
+        if (isWaveEnding || isRestorationPhase) yield break;
         
-        // Bonus Score for Wave Completion (100 * Wave Number)
+        isWaveEnding = true; 
         AddScore(100 * currentWave);
         
-        // Wait a moment after killing last enemy (Scaling with wave?)
         yield return new WaitForSeconds(2.0f);
 
         StartRestorationPhase();
+        isWaveEnding = false; 
     }
 
     private void OnSegmentBrokenHandler()
     {
-        if (isGameActive && !isRestorationPhase)
+        if (isGameActive && !isRestorationPhase && !isWaveEnding)
         {
             segmentsSpawnedCurrentWave++;
         }
     }
     
-    // REMOVED: OnEnemySpawnedHandler (No longer used)
-
     public void StartGame()
     {
         PlayButtonSound();
 
-        // Fade out menu music, then start game music
         StartCoroutine(SwitchMusic(gameplayMusic, 1.0f));
 
         startCanvas.SetActive(false);
@@ -165,7 +168,8 @@ public class GameManager : MonoBehaviour
         
         isGameActive = true; 
         currentWave = 0; 
-        score = 0; // Reset Score
+        score = 0; 
+        if (scoreText != null) scoreText.text = "0";
         
         if(lanceObject) lanceObject.SetActive(true);
         if(xrRayInteractorObject) xrRayInteractorObject.SetActive(false);
@@ -175,7 +179,6 @@ public class GameManager : MonoBehaviour
 
     private System.Collections.IEnumerator StartGameSequence()
     {
-        // 1. "ENEMY BREACH" (3 flickers)
         if (alarmSystem)
         {
              alarmSystem.TriggerAlarm("ENEMY BREACH", 3);
@@ -183,10 +186,8 @@ public class GameManager : MonoBehaviour
              yield return new WaitForSeconds(waitTime + 0.5f);
         }
 
-        // 2. "WAVE 1" (3 flickers)
         if (alarmSystem)
         {
-             // We manually trigger this here so we can wait for it before starting the actual wave logic
              string msg = string.Format("WAVE {0}", 1);
              alarmSystem.TriggerAlarm(msg, 3);
              float waitTime = (2.0f / alarmSystem.flickerSpeed) * 3.0f; 
@@ -200,55 +201,33 @@ public class GameManager : MonoBehaviour
     {
         currentWave++;
         isRestorationPhase = false;
-        enemiesSpawnedCurrentWave = 0;
-        
-        // Wave 1: 5 segments, 1 enemy/seg
-        // Wave 2: 5 segments, 2 enemies/seg
-        // Wave 3: 5 segments, 3 enemies/seg
-        // Wave 4+: Segments = 5 + (Wave-3)*2. Enemies/seg = 3.
 
         int segmentsToSpawn = 5;
-        int enemiesPerSeg = 1;
+
 
         if (currentWave <= 3)
         {
             segmentsToSpawn = 5;
-            
-            // Wave 1: 1 (min 1, max 1)
-            // Wave 2: 1-2 (min 1, max 2)
-            // Wave 3: 1-3 (min 1, max 3)
-            // Rule: min is always 1, max is currentWave
-            
-            enemiesPerSeg = 0; // Not used for calculation anymore, handled by Average
+        
         }
         else
         {
-            // Starting Wave 4: 7 segments (+2 per wave after 3)
             segmentsToSpawn = 5 + ((currentWave - 3) * 2); 
-            
-            // Wave 4+: 1-3 (Wait, user said 1,2,3 or 4 for wave 10+. Let's scale max)
-            // Let's make it 1 to 3 for Wave 4-9, and 1 to 4 for Wave 10+
-            enemiesPerSeg = 0; 
         }
-
-        // Apply rules to DestructionManager
         if (destructionManager != null)
         {
-            // Reset Limits
             int minE = 1;
             int maxE = 1;
 
             if (currentWave == 1)      { minE = 1; maxE = 1; }
             else if (currentWave == 2) { minE = 1; maxE = 2; }
             else if (currentWave == 3) { minE = 1; maxE = 3; }
-            else if (currentWave < 10) { minE = 1; maxE = 3; } // Waves 4-9
-            else                       { minE = 1; maxE = 4; } // Waves 10+
+            else if (currentWave < 10) { minE = 1; maxE = 3; } 
+            else                       { minE = 1; maxE = 4; } 
 
             destructionManager.minEnemiesPerBreach = minE;
             destructionManager.maxEnemiesPerBreach = maxE;
 
-            // NEW: We now track wave progress based on SEGMENTS spawned
-            // The wave ends when all segments have broken + all enemies are dead
             segmentsToSpawnCurrentWave = segmentsToSpawn;
             segmentsSpawnedCurrentWave = 0;
 
@@ -258,11 +237,7 @@ public class GameManager : MonoBehaviour
             destructionManager.SetDestructionActive(true);
         }
 
-            float newInterval = Mathf.Max(2.5f, 7.0f - ((currentWave - 1) * 0.4f)); 
-            destructionManager.destructionInterval = newInterval;
-            
-            destructionManager.SetDestructionActive(true);
-        }
+
 
         if(alarmSystem && currentWave > 1) 
         {
@@ -275,12 +250,6 @@ public class GameManager : MonoBehaviour
     {
         isRestorationPhase = true;
         restorationTimer = restorationDuration;
-        
-        // Wait a few seconds BEFORE showing the "RESTORE WALL" alarm
-        // Logic: "give the player a few seconds (based on which wave they are on)"
-        // Let's say: Wave 1 = 3s, Wave 10 = 1s? Or maybe longer for later waves to catch breath?
-        // Usually "catch breath" implies longer wait. 
-        // Let's do: 3 seconds base + 0.5s per wave (Max 8s)
         
         float preAlarmDelay = Mathf.Min(8.0f, 3.0f + (currentWave * 0.5f));
         StartCoroutine(RestorationAlarmRoutine(preAlarmDelay));
@@ -298,6 +267,11 @@ public class GameManager : MonoBehaviour
     {
         isGameActive = false;
         gameOverCanvas.SetActive(true);
+
+        if (gameOverScoreText != null)
+        {
+            gameOverScoreText.text = "FINAL SCORE: " + score.ToString();
+        }
 
         if(lanceObject) lanceObject.SetActive(false);
         if(xrRayInteractorObject) xrRayInteractorObject.SetActive(true);

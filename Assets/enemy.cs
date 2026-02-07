@@ -10,7 +10,6 @@ public class enemy : MonoBehaviour
     [Header("Audio")]
     public AudioClip[] deathSounds;
 
-    // BREACH LOGIC VARIABLES
     private bool isBreaching = false;
     private bool isFalling = false;
     private Vector3 breachTargetPosition;
@@ -19,30 +18,23 @@ public class enemy : MonoBehaviour
     {
         if (agent == null) agent = GetComponent<NavMeshAgent>();
         
-        // Register enemy only after breach complete (moved to CompleteBreach)
     }
 
     void OnDestroy()
     {
-        // Only unregister if we were fully breached/active
-        // Simple check: if we are not breaching anymore, we probably counted as active.
-        // OR better: rely on a flag.
         if (!isBreaching && !isFalling)
         {
              FrostEffectController.ActiveEnemyCount--;
         }
         else
         {
-            // If died while breaching/falling, we never incremented, so don't decrement.
         }
     }
 
     void Update()
     {
-        // 1. PHASE-IN LOGIC (Breaching & Falling)
         if (isBreaching)
         {
-            // STAP 1: Door de muur komen
             if (!isFalling)
             {
                 transform.position = Vector3.MoveTowards(transform.position, breachTargetPosition, speed * Time.deltaTime);
@@ -52,7 +44,6 @@ public class enemy : MonoBehaviour
                     StartFalling();
                 }
             }
-            // STAP 2: Naar beneden glijden
             else
             {
                 transform.position = Vector3.MoveTowards(transform.position, breachTargetPosition, (speed * 2f) * Time.deltaTime);
@@ -65,7 +56,6 @@ public class enemy : MonoBehaviour
             return; 
         }
 
-        // 2. NORMAL LOGIC (NavMesh)
         if (!agent.enabled || agent.pathStatus == NavMeshPathStatus.PathInvalid)
             return;
 
@@ -82,20 +72,17 @@ public class enemy : MonoBehaviour
         isFalling = false;
         agent.enabled = false; 
         
-        // Disable physics/collision during breach
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null) rb.isKinematic = true;
 
         breachTargetPosition = targetRoomPos;
-        // Keep height same as spawn to ensure horizontal entry
         breachTargetPosition.y = transform.position.y;
     }
 
     private void StartFalling()
     {
-        // Find floor directly below
         if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 10.0f, NavMesh.AllAreas))
         {
             isFalling = true;
@@ -103,7 +90,7 @@ public class enemy : MonoBehaviour
         }
         else
         {
-            CompleteBreach(); // Failsafe
+            CompleteBreach(); 
         }
     }
 
@@ -117,18 +104,21 @@ public class enemy : MonoBehaviour
         
         agent.enabled = true; 
         
-        // Snap to floor
         if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 1.0f, NavMesh.AllAreas))
         {
             agent.Warp(hit.position);
         }
 
-        // Count as "Active" only now (inside the room)
         FrostEffectController.ActiveEnemyCount++;
     }
 
+    private bool isDead = false;
+
     public void Kill()
     {
+        if (isDead) return;
+        isDead = true;
+
         agent.enabled = false;
         isBreaching = false; 
         isFalling = false;
@@ -136,7 +126,6 @@ public class enemy : MonoBehaviour
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false; 
         
-        // Play Random Death Sound
         if (deathSounds != null && deathSounds.Length > 0)
         {
             AudioClip clip = deathSounds[Random.Range(0, deathSounds.Length)];
@@ -146,12 +135,8 @@ public class enemy : MonoBehaviour
             }
         }
         
-        // Note: Do not decrement counter here, wait for OnDestroy
-        // This ensures the frost stays until the body disappears (if you destroy it later)
-
-        // ADD SCORE
         GameManager gm = FindFirstObjectByType<GameManager>();
-        if(gm != null) gm.AddScore(10); // 10 points per kill
+        if(gm != null) gm.AddScore(10); 
 
         if(animator) animator.SetTrigger("death");
         else Destroy(); 

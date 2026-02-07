@@ -26,9 +26,8 @@ public class lanceBeam : MonoBehaviour
     private LineRenderer currentLine;
     private Vector3 lastHitPosition;
 
-    public float spawnDistance = 0.05f; // Adjust this for denser/sparser trail
+    public float spawnDistance = 0.05f; 
     
-    // Welding Logic
     private float currentWeldProgress = 0f;
     private float weldDuration = 2.0f;
     private GameObject currentWeldTarget;
@@ -69,19 +68,16 @@ public class lanceBeam : MonoBehaviour
     {
         if (currentLine != null && !isOverheated)
         {
-            // Heating up
             currentHeat += Time.deltaTime / maxHeatTime;
             if (currentHeat >= 1f)
             {
                 currentHeat = 1f;
                 isOverheated = true;
                 if (audioSource && errorSound) audioSource.PlayOneShot(errorSound);
-                // StopShooting will be called in Update loop next check
-            }
+                            }
         }
         else
         {
-            // Cooling down
             currentHeat -= (Time.deltaTime / maxHeatTime) * coolingRateMultiplier;
             if (currentHeat <= 0f)
             {
@@ -193,7 +189,6 @@ public class lanceBeam : MonoBehaviour
                     {
                         Quaternion rotation = Quaternion.LookRotation(-hit.normal);
                         
-                        // FIX: Til de impact 2cm van de muur af om Z-fighting met de Occlusion Mesh te voorkomen
                         Vector3 spawnPos = hit.point + (hit.normal * 0.02f);
                         
                         GameObject heatImpact = Instantiate(heatImpactPrefab, spawnPos, rotation);

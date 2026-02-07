@@ -8,7 +8,6 @@ public class RuntimeNavmeshBuilder : MonoBehaviour
 {
     public NavMeshSurface navMeshSurface;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         
@@ -28,7 +27,6 @@ public class RuntimeNavmeshBuilder : MonoBehaviour
         StartCoroutine(buildNavMeshRoutine());
     }
     
-    // Update is called once per frame
     public IEnumerator buildNavMeshRoutine()
     {
         if (navMeshSurface != null)
