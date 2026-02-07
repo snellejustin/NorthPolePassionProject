@@ -275,7 +275,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   startCanvas: {fileID: 1473487373}
   gameOverCanvas: {fileID: 413256997}
-  maxEnemies: 15
+  strikePointLimit: 15
+  restorationDuration: 10
+  initialEnemiesPerWave: 3
+  enemyIncreasePerWave: 2
   lanceObject: {fileID: 1508451574}
   xrRayInteractorObject: {fileID: 207147540}
   destructionManager: {fileID: 1793879207}
@@ -317,7 +320,7 @@ MonoBehaviour:
   controlMode: 0
   manualIntensity: 0.51
   showDebugLogs: 0
-  maxEnemiesForFullFreeze: 15
+  maxEnemiesForFullFreeze: 8
   maxFrostIntensity: 1.7
   smoothTime: 0.5
 --- !u!82 &46001414
@@ -2415,8 +2418,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: ALARM
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: ee7cfc899379946fc94893af089f96b4, type: 2}
-  m_sharedMaterial: {fileID: -2961492628327616773, guid: ee7cfc899379946fc94893af089f96b4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4886,6 +4889,7 @@ MonoBehaviour:
   repairBoxSpawnOffset: 0
   enemyPrefab: {fileID: 9079584028516894883, guid: 3fcdff7406d2c4c00aa9cb28d080ac13, type: 3}
   spawnBehindWallDistance: 4
+  enemiesPerBreach: 1
   wallCrackSounds:
   - {fileID: 8300000, guid: 8fdc8e97039f64e99a493eb80a6e4e5f, type: 3}
   - {fileID: 8300000, guid: 4f360ab5057934c02a2a83833892f79c, type: 3}

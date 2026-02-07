@@ -15,18 +15,18 @@ public class FrostEffectController : MonoBehaviour
     public bool showDebugLogs = false;
 
     [Header("Game Logic")]
-    public float maxEnemiesForFullFreeze = 15f; 
-    public float maxFrostIntensity = 2f; // New Max Cap
+    public float maxEnemiesForFullFreeze = 8f; 
+    public float maxFrostIntensity = 2f; 
     
     [Header("Smoothness Settings")]
-    public float smoothTime = 0.5f; // Time (seconds) to reach the target value. Higher = Smoother/Slower.
+    public float smoothTime = 0.5f; 
 
     // STATIC COUNTER
     public static int ActiveEnemyCount = 0;
 
     private float targetIntensity = 0f;
     private float currentIntensity = 0f;
-    private float currentVelocity = 0f; // Helper for SmoothDamp
+    private float currentVelocity = 0f;
     private Material _targetMaterial; 
 
     void Start()
@@ -35,7 +35,7 @@ public class FrostEffectController : MonoBehaviour
         if (frostQuadRenderer == null)
         {
             // Try to find child named FrostVisor
-            Transform child = transform.Find("FrostVisor"); // If it's a child of this object
+            Transform child = transform.Find("FrostVisor");
             if (child != null) frostQuadRenderer = child.GetComponent<Renderer>();
             
             // Or try finding it in the scene (slower but robust)
@@ -83,9 +83,6 @@ public class FrostEffectController : MonoBehaviour
             case ControlMode.EnemyCount:
                 int count = ActiveEnemyCount;
                 
-                // LINEAR LOGIC: (count / max) * 1.7
-                // 0 enemies = 0.0
-                // 15 enemies = 1.7
                 float fraction = Mathf.Clamp01((float)count / maxEnemiesForFullFreeze);
                 targetIntensity = fraction * maxFrostIntensity;
                 
@@ -96,7 +93,6 @@ public class FrostEffectController : MonoBehaviour
                 break;
 
             case ControlMode.TimeLoop:
-                // Gaat van 0 naar 1 en terug
                 targetIntensity = Mathf.Lerp(0f, 1.0f, Mathf.PingPong(Time.time * 0.5f, 1.0f));
                 break;
 

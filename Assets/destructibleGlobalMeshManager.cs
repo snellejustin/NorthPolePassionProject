@@ -1,5 +1,6 @@
 using UnityEngine;
 using Meta.XR.MRUtilityKit;
+// Force Recompile
 using System.Collections.Generic;
 using System.Collections; // Needed for Coroutines
 
@@ -18,6 +19,7 @@ public class destructibleGlobalMeshManager : MonoBehaviour
     [Header("Enemy Spawning")]
     public GameObject enemyPrefab; 
     public float spawnBehindWallDistance = 4.0f; // Increased to 4m for better visibility test 
+    public int enemiesPerBreach = 1; // Controlled by GameManager 
 
     [Header("Audio")]
     public AudioClip[] wallCrackSounds;
@@ -26,6 +28,14 @@ public class destructibleGlobalMeshManager : MonoBehaviour
     private DestructibleMeshComponent currentComponent;
     private float timer;
     private bool isDestructionActive = false;
+
+    // Event to notify GameManager
+    public System.Action OnEnemySpawned;
+
+    public int GetBrokenWallCount()
+    {
+        return hitboxToSegmentMap.Count;
+    }
 
     void Start()
     {
@@ -133,44 +143,51 @@ public class destructibleGlobalMeshManager : MonoBehaviour
             StartCoroutine(ActivateHitboxRoutine(hitbox, delay));
             // -------------------------
 
-            // --- 2. SPAWN ENEMY ---
+            // --- 2. SPAWN ENEMIES ---
             if (enemyPrefab != null)
             {
                 Vector3 wallCenter = (segRenderer != null) ? segRenderer.bounds.center : segment.transform.position;
                 Vector3 playerPos = Camera.main ? Camera.main.transform.position : Vector3.zero;
 
-                // ROBUST LOGIC: Calculate direction from Player to Wall
-                // This gives us the "Outward" vector regardless of debris rotation.
-                Vector3 outwardDir = (wallCenter - playerPos);
-                
-                // Flatten Y to ensure we don't shoot into the sky or floor
-                outwardDir.y = 0;
-                outwardDir.Normalize();
-                
-                // If for some reason player is exactly on top of wall (zero vector), default to Z forward
-                if(outwardDir == Vector3.zero) outwardDir = Vector3.forward;
-
-                // Spawn 4 meters "Further out" from the wall center
-                Vector3 spawnPos = wallCenter + (outwardDir * spawnBehindWallDistance);
-                
-                // Ensure the enemy stays at the same height as the hole (or floor aligned?)
-                // User complained about "down under", so let's stick to the hole's Y level.
-                // But wait, if hole is high, enemy floats. 
-                // Let's force spawn Y to be the same as wallCenter Y (hole height).
-                 spawnPos.y = wallCenter.y;
-                
-                // Spawn enemy looking AT the wall (opposite to outward direction)
-                GameObject newEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.LookRotation(-outwardDir));
-
-                enemy enemyScript = newEnemy.GetComponent<enemy>();
-                if (enemyScript != null)
+                // Loop for multiple enemies
+                for (int i = 0; i < enemiesPerBreach; i++)
                 {
-                    // Use the outward direction to calculate the entry point (just slightly inside the room/hole)
-                    // We move from Outside -> WallCenter -> Inside
-                    // Actually, WallCenter IS the hole. 
-                    // Let's set the target to the wall center itself.
-                    Vector3 roomEntryPos = wallCenter;
-                    enemyScript.InitializeBreach(roomEntryPos);
+                    // ROBUST LOGIC: Calculate direction from Player to Wall
+                    Vector3 outwardDir = (wallCenter - playerPos);
+                    
+                    // Flatten Y
+                    outwardDir.y = 0;
+                    outwardDir.Normalize();
+                    
+                    if(outwardDir == Vector3.zero) outwardDir = Vector3.forward;
+
+                    // Base Spawn Pos
+                    Vector3 spawnPos = wallCenter + (outwardDir * spawnBehindWallDistance);
+
+                    // Add Random Offset for multiple enemies (or even single ones for variety)
+                    // We scramble X/Z relative to the world, simpler than local right vector calculation for now
+                    if (enemiesPerBreach > 1 || i > 0)
+                    {
+                        float entropy = 1.5f; // Spread amount
+                        Vector3 offset = new Vector3(Random.Range(-entropy, entropy), 0, Random.Range(-entropy, entropy));
+                        spawnPos += offset;
+                    }
+                    
+                    // Force height
+                    spawnPos.y = wallCenter.y;
+                    
+                    // Spawn enemy looking AT the wall
+                    GameObject newEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.LookRotation(-outwardDir));
+
+                    enemy enemyScript = newEnemy.GetComponent<enemy>();
+                    if (enemyScript != null)
+                    {
+                        Vector3 roomEntryPos = wallCenter;
+                        enemyScript.InitializeBreach(roomEntryPos);
+                    }
+
+                    // Notify GameManager
+                    OnEnemySpawned?.Invoke();
                 }
             }
         }

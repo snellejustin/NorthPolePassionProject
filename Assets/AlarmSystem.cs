@@ -32,18 +32,29 @@ public class AlarmSystem : MonoBehaviour
             // DO NOT set gameObject.SetActive(false) here, or the script stops running!
         }
     }
-
     // Call this function later for waves: TriggerAlarm("WAVE 2 INCOMING");
     public void TriggerAlarm(string message)
+    {
+        Debug.Log($"[AlarmSystem] Triggering Alarm with message: '{message}'");
+        TriggerAlarm(message, 3); 
+    }
+
+    public void TriggerAlarm(string message, int flickerCount)
     {
         // Ensure object is on before starting coroutine
         if (alarmCanvasGroup != null) alarmCanvasGroup.gameObject.SetActive(true);
         
         StopAllCoroutines(); 
-        StartCoroutine(AlarmRoutine(message));
+        
+        // Calculate duration based on flicker count
+        // Cycle = 2.0f / flickerSpeed
+        float cycleDuration = 2.0f / flickerSpeed;
+        float totalDuration = cycleDuration * flickerCount;
+        
+        StartCoroutine(AlarmRoutine(message, totalDuration));
     }
 
-    private IEnumerator AlarmRoutine(string message)
+    private IEnumerator AlarmRoutine(string message, float customDuration)
     {
         if (alarmCanvasGroup == null)
         {
@@ -57,9 +68,9 @@ public class AlarmSystem : MonoBehaviour
         alarmCanvasGroup.alpha = 0f;
 
         float elapsed = 0f;
-        float cycleDuration = 2.0f / flickerSpeed; // Time for one full 0->1->0 cycle
+        float cycleDuration = 2.0f / flickerSpeed; 
 
-        while (elapsed < duration)
+        while (elapsed < customDuration)
         {
             // Play sound at start of pulse/cycle
             if (audioSource != null && alarmSound != null)
