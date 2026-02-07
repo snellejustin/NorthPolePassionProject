@@ -19,7 +19,11 @@ public class destructibleGlobalMeshManager : MonoBehaviour
     [Header("Enemy Spawning")]
     public GameObject enemyPrefab; 
     public float spawnBehindWallDistance = 4.0f; // Increased to 4m for better visibility test 
-    public int enemiesPerBreach = 1; // Controlled by GameManager 
+    public float spawnBehindWallDistance = 4.0f; // Increased to 4m for better visibility test 
+    
+    // Controlled by GameManager: Range of enemies per breach
+    public int minEnemiesPerBreach = 1; 
+    public int maxEnemiesPerBreach = 1; 
 
     [Header("Audio")]
     public AudioClip[] wallCrackSounds;
@@ -29,8 +33,9 @@ public class destructibleGlobalMeshManager : MonoBehaviour
     private float timer;
     private bool isDestructionActive = false;
 
-    // Event to notify GameManager
+    // Events to notify GameManager
     public System.Action OnEnemySpawned;
+    public System.Action OnSegmentBroken;
 
     public int GetBrokenWallCount()
     {
@@ -134,6 +139,9 @@ public class destructibleGlobalMeshManager : MonoBehaviour
             }
             hitboxToSegmentMap.Add(hitbox, segment);
 
+            // Notify GameManager that a segment broke (used for wave progress)
+            OnSegmentBroken?.Invoke();
+
             // --- DELAY LOGIC START ---
             // Hide the hitbox immediately so it doesn't block the enemy or the view
             hitbox.SetActive(false);
@@ -149,8 +157,10 @@ public class destructibleGlobalMeshManager : MonoBehaviour
                 Vector3 wallCenter = (segRenderer != null) ? segRenderer.bounds.center : segment.transform.position;
                 Vector3 playerPos = Camera.main ? Camera.main.transform.position : Vector3.zero;
 
-                // Loop for multiple enemies
-                for (int i = 0; i < enemiesPerBreach; i++)
+                // Loop for multiple enemies (Randomized count)
+                int enemiesToSpawn = Random.Range(minEnemiesPerBreach, maxEnemiesPerBreach + 1); // +1 because Random.Range int is exclusive at max
+
+                for (int i = 0; i < enemiesToSpawn; i++)
                 {
                     // ROBUST LOGIC: Calculate direction from Player to Wall
                     Vector3 outwardDir = (wallCenter - playerPos);
@@ -166,7 +176,7 @@ public class destructibleGlobalMeshManager : MonoBehaviour
 
                     // Add Random Offset for multiple enemies (or even single ones for variety)
                     // We scramble X/Z relative to the world, simpler than local right vector calculation for now
-                    if (enemiesPerBreach > 1 || i > 0)
+                    if (enemiesToSpawn > 1 || i > 0)
                     {
                         float entropy = 1.5f; // Spread amount
                         Vector3 offset = new Vector3(Random.Range(-entropy, entropy), 0, Random.Range(-entropy, entropy));

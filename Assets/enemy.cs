@@ -19,14 +19,22 @@ public class enemy : MonoBehaviour
     {
         if (agent == null) agent = GetComponent<NavMeshAgent>();
         
-        // Register enemy for frost effect
-        FrostEffectController.ActiveEnemyCount++;
+        // Register enemy only after breach complete (moved to CompleteBreach)
     }
 
     void OnDestroy()
     {
-        // Unregister enemy
-        FrostEffectController.ActiveEnemyCount--;
+        // Only unregister if we were fully breached/active
+        // Simple check: if we are not breaching anymore, we probably counted as active.
+        // OR better: rely on a flag.
+        if (!isBreaching && !isFalling)
+        {
+             FrostEffectController.ActiveEnemyCount--;
+        }
+        else
+        {
+            // If died while breaching/falling, we never incremented, so don't decrement.
+        }
     }
 
     void Update()
@@ -114,6 +122,9 @@ public class enemy : MonoBehaviour
         {
             agent.Warp(hit.position);
         }
+
+        // Count as "Active" only now (inside the room)
+        FrostEffectController.ActiveEnemyCount++;
     }
 
     public void Kill()
@@ -137,6 +148,10 @@ public class enemy : MonoBehaviour
         
         // Note: Do not decrement counter here, wait for OnDestroy
         // This ensures the frost stays until the body disappears (if you destroy it later)
+
+        // ADD SCORE
+        GameManager gm = FindFirstObjectByType<GameManager>();
+        if(gm != null) gm.AddScore(10); // 10 points per kill
 
         if(animator) animator.SetTrigger("death");
         else Destroy(); 
