@@ -39,7 +39,7 @@ public class GameManager : MonoBehaviour
     
     public int score = 0;
     public TMPro.TMP_Text scoreText; 
-    public TMPro.TMP_Text gameOverScoreText; /
+    public TMPro.TMP_Text gameOverScoreText; 
 
 
     void Start()
@@ -185,7 +185,6 @@ public class GameManager : MonoBehaviour
              float waitTime = (2.0f / alarmSystem.flickerSpeed) * 3.0f; 
              yield return new WaitForSeconds(waitTime + 0.5f);
         }
-
         if (alarmSystem)
         {
              string msg = string.Format("WAVE {0}", 1);
@@ -228,6 +227,19 @@ public class GameManager : MonoBehaviour
             destructionManager.minEnemiesPerBreach = minE;
             destructionManager.maxEnemiesPerBreach = maxE;
 
+            if (currentWave < 3) 
+            {
+                destructionManager.spawnBehindWallDistance = 4.0f;
+            }
+            else if (currentWave < 5)
+            {
+                destructionManager.spawnBehindWallDistance = 2.0f;
+            }
+            else
+            {
+                destructionManager.spawnBehindWallDistance = 1.0f;
+            }
+
             segmentsToSpawnCurrentWave = segmentsToSpawn;
             segmentsSpawnedCurrentWave = 0;
 
@@ -239,10 +251,10 @@ public class GameManager : MonoBehaviour
 
 
 
-        if(alarmSystem && currentWave > 1) 
+        if(alarmSystem && currentWave >= 1) 
         {
             string msg = string.Format("WAVE {0}", currentWave);
-            alarmSystem.TriggerAlarm(msg, 3);
+            if(currentWave > 1) alarmSystem.TriggerAlarm(msg, 3);
         }
     }
 

@@ -175,7 +175,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: b88d0dc379af44ba7822b5550f06ede2, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: f043bb4646b2b4bc5a54a20891495d80, type: 2}
+      objectReference: {fileID: 2100000, guid: edd606186a3484357afedfb18296cf43, type: 2}
     - target: {fileID: -7511558181221131132, guid: b88d0dc379af44ba7822b5550f06ede2, type: 3}
       propertyPath: 'm_Materials.Array.data[1]'
       value: 
